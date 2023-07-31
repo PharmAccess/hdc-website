@@ -1,6 +1,6 @@
 project:
   type: book
-  output-dir: public
+  output-dir: intranet
 
 book:
   title: "Towards a health data commons in LMICs"
