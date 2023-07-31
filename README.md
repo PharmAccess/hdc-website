@@ -4,9 +4,9 @@
 
 This repository contains the source code for the Health Data Commons (KDC) demonstrator project. It is written in [Quarto](https://quarto.org). The document is intended for internal use at PharmAccess Foundation. In due course, parts of this whitepaper are intended for publications
 
-> Read the whitepaper at [https://pharmaccess.gitlab.io/health-data-commons-whitepaper](https://pharmaccess.gitlab.io/health-data-commons-whitepaper)
+> Read the whitepaper at [http://health-data-commons.pharmaccess.org/](http://health-data-commons.pharmaccess.org/)
 > 
-## How to work with Quarto and Gitlab
+## How to work with Quarto and GitHub
 
 ### Getting started
 
