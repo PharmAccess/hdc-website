@@ -1,0 +1,5 @@
+---
+title: Narrative
+---
+
+The following chapters describe the narrative and perspective on health data commons, and the context of MomCare Tanzania as a testbed.

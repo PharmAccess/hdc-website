@@ -1,0 +1,34 @@
+## List of abbreviations {.unnumbered}
+
+| Abbrevation   | Definition |
+|:--------------|:-----------|
+| API           | [Application Programming Interface](https://en.wikipedia.org/wiki/API) |
+| CR            | [Client Registry](https://guides.ohie.org/arch-spec/openhie-component-specifications-1/client-registry) (openHIE component) |
+| CoT           | Chain of Trust, the name of the app used in MomCare Tanzania |
+| DHIS2         | District Health Information System, version 2, a type of HMIS |
+| FIS           | [Finance and Insurance Service](https://guides.ohie.org/arch-spec/openhie-component-specifications-1/openhie-finance-and-insurance-service) (openHIE component) |
+| FHIR          | [Fast Healthcare Interoperability Resources](https://fhir.org) |
+| FR            | [Facility Registry](https://guides.ohie.org/arch-spec/openhie-component-specifications-1/openhie-facility-registry-fr) (openHIE component) |
+| GDPR          | General Data Protection Regulation |
+| HL7           | [Health Level 7 International](https://www.hl7.org/index.cfm), the governing body of the FHIR standard |
+| HDC           | Health Data Commons |
+| HIE           | Health Information Exchange |
+| HMIS          | [Health Management Information System](https://guides.ohie.org/arch-spec/openhie-component-specifications-1/openhie-health-management-information-system-hmis) (openHIE component) |
+| HWR           | [Health Worker Registry](https://guides.ohie.org/arch-spec/openhie-component-specifications-1/openhie-health-worker-registry-hwr) (openHIE component) |
+| IOL           | [Interoperability layer](https://guides.ohie.org/arch-spec/openhie-component-specifications-1/openhie-interoperability-layer-iol) (openHIE component) |
+| LMIC          | Low- and middle-income country |
+| LMIS          | [Logistics Management Information System](https://guides.ohie.org/arch-spec/openhie-component-specifications-1/openhie-logistics-management-information-system-lmis) (openHIE component) |
+| OHS           | [Open Health Stack](https://developers.google.com/open-health-stack/overview) |
+| OpenHIE       | Open source community and specification of a HIE |
+| OpenHIM       | [Open Health Information Mediator](http://openhim.org/), an open source reference implementation of the interoperability layer of openHIE |
+| PC            | [Product Catalogue](https://guides.ohie.org/arch-spec/openhie-component-specifications-1/openhie-product-catalogue-pc) (openHIE component) |
+| PET           | [Privacy-enhancing technology](https://en.wikipedia.org/wiki/Privacy-enhancing_technologies) |
+| PII           | Personnally Identifiable Information |
+| PoC           | [Point-of-Care system](https://guides.ohie.org/arch-spec/openhie-component-specifications-1/point-of-care-systems) (openHIE component)|
+| PoS           | Point-of-Service system, alternative name of Point-of-Care system |
+| PR            | Patient Registry, alternative name for Client Registry (openHIE component) |
+| REST          | [Representational state transfer](https://en.wikipedia.org/wiki/Representational_state_transfer), a software architectural style used in web APIs |
+| SQL           | [Structured Query Language](https://en.wikipedia.org/wiki/SQL) |
+| SHR           | [Shared Health Record](https://guides.ohie.org/arch-spec/openhie-component-specifications-1/openhie-shared-health-record-shr) (openHIE component)|
+| TS            | [Terminology Service](https://guides.ohie.org/arch-spec/openhie-component-specifications-1/openhie-terminology-service-ts) (openHIE component) |
+| UHC           | Universal Health Coverage |

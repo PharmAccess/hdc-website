@@ -1,0 +1,33 @@
+## Analytics on FHIR {#sec-analytics-on-fhir}
+
+## Current standards for analytics
+
+- Explain Jupyter notebook for interactive computing
+- We want to support different languages
+- Federated analytics
+  - Most simple way: we mount the different data containers, which currently are ADLS Gen2 containers
+  - In future: federated analytics libraries
+- Option: computation in the blind
+
+Interactive notebooks are the de-facto standard for analysts and researchers.
+Many open source solutions which can be self-hosted, most importantly Jupyter Project
+Many commercial offerings:
+All cloud vendors have own version of Jupyter already integrated in their environment
+To save engineering work, for now we opt for Azure ML Studio
+
+The paradigm shift that we introduce is federated analytics
+Federated analytics = queries over decentralised databases
+Federated learning = training algorithms over decentralised data
+We use federated analytics as a term to cover both. For LMICs, starting with federated analytics (queries) is positioned on short term
+We add multi-party computation as optional component that can be used through interactive notebook environment
+
+Impacts following components:
+Data Visualization and User Interaction
+Data Analytics
+Data processing architectures
+Standards
+Considerations for LRS
+
+
+
+

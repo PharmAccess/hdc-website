@@ -1,0 +1,74 @@
+project:
+  type: book
+  output-dir: public
+
+book:
+  title: "Towards a health data commons in LMICs"
+  subtitle: "Demonstrating fair sharing and re-use of health data in sub-Saharan Africa"
+  author: "Daniel Kapitan, Julie Fleischer, Chris Ihure, Rob Wiegman, Iris Bokkes, Mark van der Graaf"
+  repo-url: https://github.com/PharmAccess/health-data-commons-guidebook
+  repo-actions: [edit, issue]
+  repo-branch: main
+  downloads: pdf
+  search: true
+  page-navigation: true
+  page-footer:
+    background: light
+    left: "© PharmAccess Foundation, 2023."
+  chapters:
+    - text: "Management summary"
+      href: index.qmd
+    - docs/abbreviations.qmd
+    - part: docs/narrative.qmd
+      chapters:      
+        - docs/health-data-commons.qmd
+        - docs/momcare.qmd
+    - part: docs/demonstrators.qmd
+      chapters:      
+        - docs/mediator.qmd    
+        - docs/shr.qmd
+        - docs/reporting.qmd
+        - docs/DHIS2-reports.qmd
+        - docs/valuepoints.qmd
+        - docs/offline-webapp.qmd
+        - docs/workbench.qmd 
+    - docs/bibliography.qmd
+  sidebar:
+    logo: "logo-pharmaccess.png"
+    tools:
+      - icon: globe
+        href: https://pharmaccess.org
+        text: "https://pharmaccess.org"
+      - icon: linkedin
+        href: https://www.linkedin.com/company/pharm-access-foundation/
+        text: "LinkedIn company page"
+    collapse-level: 1
+    pinned: true
+          
+bibliography: pharmaccess.bib
+toc: true
+number-sections: true
+number-depth: 2
+crossref: 
+  fig-prefix: figure
+  tbl-prefix: table
+
+format:
+  html:
+    theme: flatly
+  pdf:
+    documentclass: scrbook
+    # classoption: [twocolumn, landscape]
+    toc-title: "Contents"
+    lof: true
+    lot: true
+    geometry:
+      - top=30mm
+      - left=20mm
+      - heightrounded
+    fontfamily: libertinus
+    colorlinks: true
+    linkcolor: teal
+    filecolor: teal
+    citecolor: teal
+    urlcolor: teal

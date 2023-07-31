@@ -1,0 +1,65 @@
+## FHIR-based reporting {#sec-fhir-based-reporting}
+
+This section describes the functionality that is implemented to generate standardized tables and reports from fhir resources.
+
+## Base reporter: Standardized tables
+We provide a base reporter that extracts the most important information for the momcare project from the fhir resources into standardized tables. These standardized tables serve as a starting point for further analysis.
+
+#### Patient timeline table
+In the MomCare project, the patient's journey over time is tracked. This means that most important information would be captured with a table that tracks each procedure, treatment, or diagnosis that a patient receives over time. For this reason we implemented a functionality to create the patient timeline table.  
+
+The *patient_timeline* table consists of all procedures and diagnosis that a patient is subjected to over time. It is created based on the following fhir resources:  
+
+* patient 
+* procedure
+* condition
+* encounter
+* observation
+* organization
+
+The *patient_timeline* is of the following format:
+
+| patient_id | encounter_id | visit_provider_id | visit_provider_name | procedure_time | code | system | type | description_name | visitType | visit_type_code | visit_no | visit_type_no | gestation_week |
+|---|---|---|---|---|---|---|---|---:| ---:|---|---|---|---|
+| 6c2c-3576 | 34 | 52 | Dawar Dispensary | 2022-10-10 | O98.7 | ICD10 | condition | HIV in pregnancy | Antenatal care | 424525001 | 2 | 2 | 20 |
+| 6c2c-3576| 34 | 52 | Dawar Dispensary | 2022-10-10 | NaN | snomed | procedure | HIV test | Antenatal care | 424525001 | 1 | 1 | 18 |
+| 6c2c-3576| 123 | 2 | Ngarenairobi RC Health centre | 2022-11-18 | Z34 | ICD10 | condition | HIV test | Postpartum care | 424525001 | 10 | 1 | 44 |
+| 6c2c-3576 | 123 | 2 | Ngarenairobi RC Health centre | 2022-11-18 | NaN | snomed | procedure | Malaria Rapid Test | Antenatal care | 133906008 | 3 | 3 | 30 |
+|6c2c-3576 | 123 | 2 | Ngarenairobi RC Health centre | 2022-11-18 | NaN | snomed | procedure | Blood pressure | Antenatal care | 424525001 | 1 | 1 | 8 |
+
+next to the patient_timeline also some basic information about the patient is of importance, for this reason the *patient_information* table is created: 
+
+| patient_id | birthDate | enrollment_date | age_at_enrolment | age_group | delivery_date | expected_delivery_date |
+|---|---|---|---|---|---|---|
+| 0242ac120002 | 2002-12-10 | 2023-04-22 | 20 | AGE_GROUP_20_24 | NaT |2023-09-06 |
+| 4b9e0e3b2-9ced | 1990-09-10 | 2020-04-01 | 29 | AGE_GROUP_25_29 | 2020-10-01 |2020-10-08 |
+
+For further analysis those two tables are often combined into one *patient_timline_combined* table
+
+#### questionnare_response table
+Besides the patient's yourney the patient is also requested to answer different questionnaires. The DataCare module contains the functionality to flatten the fhir Resource questionnaireResponse to create a table containing all questionnaires' questions and answers for each patient. This table is called the *questionnaire_response* table and is of the following format:
+
+
+| patientId | ClinicName | date | survey_id | question_id |question | answer | ... | 
+|---|---|---|---|---|---|---|---:|
+| 6c2c-3576 | Tumaini Hospital | 2021-10-07 | 1 | 44 |Do you have a previous C-Section scar?	 | false | ... |
+| 6c2c-3576 | Tumaini Hospital | 2021-10-07 | 1 | 42 | Is this your first child? | true | ... |
+| 6c2c-3576 | Tumaini Hospital | 2021-10-07 | 2 | 36| At what age did you have your first child?	 | <20 | ... |
+| 6c2c-3576 | Tumaini Hospital | 2021-10-07 | 2 | 35 | How many times have you been pregnant before? | 0 | ... |
+
+
+## Usage Base Reporter
+Based on the base reports described above, different reports of interest can be created:
+
+* **DHIS2 reports** provide insight in how many mothers visit a clinic, what conditions occur amongst mothers that visit that clinic, and what procedures mothers obtain in a clinic.
+* **Value point reports** provide the value points (described in the *value points* section) obtained by clinics by threathing their patients.
+
+In @fig-reporting-flow, a high level overview is given of how the base reports provide input for the DHIS2 and value points reports
+
+![Reporting schema, *orange: 'raw' fhir data, yellow: external data, blue: intermediate data, green: processed data*](./images/reporting%20schema.png){#fig-reporting-flow}
+
+### TODO
+In the analytics workbench an example note book is provided, showing how to use the base reporter.
+
+
+

@@ -1,0 +1,7 @@
+altair
+jupyter
+matplotlib
+nbformat
+nbconvert
+numpy
+pandas

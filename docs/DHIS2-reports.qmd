@@ -1,0 +1,302 @@
+# DHIS2
+DHIS2 is a tool used for collection, validation and presentation of patient-based statistical data. 
+To use this tool we need tables in a standardized format that can be used by DHIS2. From now on we call those table DHIS2 reports. In addition, governments use the DHIS2 reports to obtain insights the performance of different clinics. For MomCare three DHIS2 reports are of interest:
+
+* Antenatal Care (ANC) Report, containing all statistics about care for pregnant women before delivery of their child.
+* Delivery Report, containing statistsics about the care during the delivery
+* Postpartum Care (PNC) Report, containing statistics about the care of the mother after delivery of her child.
+
+The DHIS2 reports are of the following format:
+
+| serial_number | description | year | month | clinic | age_group_10_14  | age_group_15_19 | age_group_20_24 | age_group_25_29 | age_group_30_34 | age_group_35_plus |
+|---|---|---|---|---|---|---|---|---|---|---|---:|
+| 1| Mothers expected /projected to deliver at service station | 2022 | 7 |Charlotte Hospital | 0 | 0 | 1 | 0 | 1 | 0|
+
+Where the description shows the DHIS2 topic, and for each clinic and each age group the occurence in that year and month is counted.
+
+## DHIS2 reporter 
+To create the DHIS2 reports based on the fhir data and standardized tables created by the Baser Reporter we developed the DHIS2Reporter Class.  
+
+All Fhir resources required for the DHIS2 reports are: 
+
+* patient
+* condition
+* procedure
+* encounter
+* observation
+* organization
+* serviceRequest
+* questionnaireResponse
+
+In @fig-DHIS2-reporting-schema the flow to create a DHIS2 report has been visualized. 
+
+![DHIS2 reporting flow and required input, dashed blocks: optional actions, orange: 'raw' fhir data, yellow: external data, blue: intermediate data, green: processed data](./images/reporting%20schema%20dhis2.png){#fig-DHIS2-reporting-schema}
+
+The DHIS2 reporter has functions to create the DHIS2 report for each report separately (ANC, Delivery, PNC)
+
+Before running the DHIS2 reporter, first the baseReporter should be used to created the base tables.  
+
+Thereafter the following actions occur in the DHIS2 reporter:
+
+* mapping tables are created based on several mapping files for the DHIS2 reports. These files make it easy to map rows in the *questionnaire_response* and *patient_timeline* tables to topics in the DHIS2 reports. This section is dashed because it is not required to recreate the mapping tables every time. However, when running the dhis2reporter for the first time and when the mapping is updated, the mapping tables should be recreated.
+* The patient_timeline table is enriched with extra information that is of importance to create DHIS2 reports.
+* Then, the DHIS2 topics are coupled to the patient timeline and questionnaire response data using the mapping tables, and separate functions for more unique topics.
+* Finally, the DHIS2 report is created based on the coupled patient_timeline and questionnaire data.
+
+### DHIS2 topics
+
+For each topic in the DHIS2 reports a calculation or filtering of the patients to which the condition applies is required. In this section, we describe for each topic how it was obtained from the data.
+
+**ANC reports**
+
+|serial_number|description                                                                                | code | system | origin | original_description | extra filter |
+|-------------|-------------------------------------------------------------------------------------------| --- | --- | --- | --- | --- | 
+|1            |Number of Projected pregnant women                                                         | na | na | metric | na | given by clinic |
+|2            |First ANC visit                                                                            | na | na | metric |  na | VISIT_TYPE_NO = 1 and VISIT_TYPE = ANC |
+|2a           |Week of pregnancy below 12 weeks (< 12 weeks)                                              | na | na | metric | na | gestation_week < 12 and VISIT_TYPE = ANC and VISIT_TYPE_NO = 1|
+|2b           |Week of pregnancy above 12 weeks (>= 12 weeks)                                             | na | na | metric | na | gestation_week >= 12 and VISIT_TYPE = ANC and VISIT_TYPE_NO = 1|
+|2c           |All revisit clients                                                                        | na | na | metric | na | VISIT_NO > 1 |
+|2d           |All pregnant women with 4+ ANC visits                                                      | na | na | metric | na | visit_type_no >= 4 and Visit_type = ANC |
+|2e           |Number of pregnant women with HB test at first ANC visit                                   | 23244001 | snomed | procedure | Hemoglobin | VISIT_TYPE = ANC and VISIT_TYPE_NO = 1 |
+|3            |Pregnant women given TT2+ vaccine                                                          | 146080110000011 | snomed | procedure | Tetanus toxoid | VISIT_TYPE = ANC |
+|4a           |4th and more pregnancy                                                                     | na | na | questionnaireResponse | How many times have you been pregnant before? | Answer: >4,4,5,5+ |  
+|4b           |Below 20 YEARs                                                                             | na | na | metric | na | age < 20 |
+|4c           |First pregnancy at 35 and above YEARs                                                      | O09.61 | ICD10 | condition | primigravida | AGE >= 35 |
+|4c           |First pregnancy at 35 and above YEARs                                                      |na | na | questionnaireResponse | At what age did you have your first child? | answer =  >35 |
+|4c           |First pregnancy at 35 and above YEARs                                                      | na| na | questionnaireResponse | Were you older than 35 when you first got pregnant? | answer = true|
+|4d           |Low HB < 8.5 g/dl - Anemia first visit                                                     | O99.0 | ICD10 | condition | Anaemia in pregnancy | VISIT_TYPE = ANC, VISIT_TYPE_NO = 1 | 
+|4e           |High blood pressure (BP => 140/90 hg)                                                      | O13 | ICD10 | condition | Pregnancy - induced hypertension | VISIT_TYPE = ANC | 
+|4f           |Tuberculosis                                                                               | O98.0 | ICD10 | condition | Tuberculosis | VISIT_TYPE = ANC |
+|4g           |Sugar in urine                                                                             | 69376001.0 | snomed | procedure | Urine test for Glucose | VISIT_TYPE = ANC |
+|4h           |Protein in urine                                                                           |441948005.0 | snomed | procedure | Urine test for Protein | VISIT_TYPE = ANC|
+|4i           |Pregnant women tested for syphilis                                                         | 169698000 | snomed | procedure | Syphilis test / VDRL or PRP | VISIT_TYPE = ANC |
+|4j           |Diagnosed with syphilis infection                                                          | O98.1 | ICD10 | condition | Syphilis | ISIT_TYPE = ANC |
+|4k           |Treated for syphilis infection                                                             | 75247008 | snomed | procedure | Syphilis treatment | VISIT_TYPE = ANC |
+|4l           |Partners tested for syphilis infection                                                     | na | na | questionnaireResponse | Partner tested for syphilis infection | answer = true |
+|4m           |Partners diagnosed with syphilis infection                                                 | na | na | questionnaireResponse | Partner diagnosed with syphilis infection | answer = true |
+|4n           |Partners / spouse treated for syphilis infections                                          | na | na | questionnaireResponse | Partner/spouse treated for syphilis infections | answer = true |
+|4o           |Pregnant women diagnosed with non syphilis Sexually Transmitted Diseases (STDs)            | N77.1 | ICD10 | condition | bacterial vaginosis | VISIT_TYPE = ANC |
+|4o           |Pregnant women diagnosed with non syphilis Sexually Transmitted Diseases (STDs)            | A56 | ICD10 | condition | chlamydia | VISIT_TYPE = ANC |
+|4o           |Pregnant women diagnosed with non syphilis Sexually Transmitted Diseases (STDs)            | O54.10 | ICD10 | condition | genital herpes | VISIT_TYPE = ANC |
+|4o           |Pregnant women diagnosed with non syphilis Sexually Transmitted Diseases (STDs)            | A54.9 | ICD10 | condition |gonorrhea | VISIT_TYPE = ANC |
+|4o           |Pregnant women diagnosed with non syphilis Sexually Transmitted Diseases (STDs)            | N73.9 | ICD10 | condition | pelvic inflammatory disease | VISIT_TYPE = ANC |
+|4o           |Pregnant women diagnosed with non syphilis Sexually Transmitted Diseases (STDs)            | B37| ICD10 | condition | Candidiasis | VISIT_TYPE = ANC |
+|4p           |Pregnant women who received correct treatment for non syphilis STDs                        | ? | snomed | procedure | Other STD treatment | VISIT_TYPE = ANC |
+|4q           |Partners / spouses diagnosed with non syphilis STDs                                        | na | na | questionnaireResponse | Partners/spouses diagnosed with non syphilis STDs | answer = true |
+|4r           |Partners / spouses who receive correct treatment for non syphilis STDs                     | na | na | questionnaireResponse | Partners/spouses received correct treatment for non syphilis STDs | answer = true |
+|5a           |Pregnant mothers with known HIV infection before starting ANC clinic                       | na|na|questionnaireResponse|(Current Medical Condition)Do you have any of these health conditions? | answer = HIV |
+|5b           |Pregnant women who received councelling before HIV testing                                 | 313077009 |snomed | procedure | HIV councelling (before test) | VISIT_TYPE = ANC | 
+|5c           |Pregnant women receiving first HIV test at ANC clinic                                      | 171121004 | snomed |procedure | HIV test | VISIT_TYPE = ANC and HIV_TEST = 1 |
+|5d           |Pregnant women found to be HIV positive - first test                                       | O98.7 | ICD10 | condition | HIV in pregnancy | VISIT_TYPE = ANC and HIV_TEST = 1 |
+|5e           |Pregnant women below 25 YEARs found to be HIV positive - first test                        |O98.7 | ICD10 | condition |HIV in pregnancy | VISIT_TYPE = ANC and HIV_TEST =1 and age < 25 |
+|5f           |Pregnant women councelled after HIV testing                                                | 313077009 | snomed | procedure | HIV councelling (after test) | VISIT_TYPE = ANC | 
+|5g           |Pregnant women tested for HIV with spouse/partner                                          | 171121004 | snomed | procedure | HIV test | VISIT_TYPE = ANC |
+|5h           |Pregnant women receiving second HIV test                                                   | 171121004 | snomed | procedure | HIV test | VISIT_TYPE = ANC and HIV_TEST=2| 
+|5i           |Pregnant women  found to be HIV positive by second HIV test                                | O98.7 | ICD10 | condition | HIV in pregnancy | VISIT_TYPE = ANC and HIV_TEST=2 |
+|5j           |Partner/spouse receiving first HIV test at ANC clinic                                      | na | na | questionnaireResponse | Partners/spouse receiving first HIV test at ANC clinic | answer = true |
+|5k           |Partner/spouse found to be HIV positive by first test                                      | na | na | questionnaireResponse | Partners/spouse found to be HIV positive by first test | answer = true |
+|5l           |Partner/spouse receiving second HIV test at ANC                                            | na | na | questionnaireResponse | Partner/spouse receiving second HIV test at ANC | answer = true |
+|5m           |Partner/spouse found to be HIV positive by second test                                     | na | na | questionnaireResponse | Partner/spouse found to be HIV positive by second test | answer = true |
+|5n           |Pregnant women and partners/spouses with discordant HIV results after testing at ANC clinic| na | na | questionnaireResponse | Partners/spouses with discordant HIV results after testing at ANC clinic | answer = true |
+|5o           |Pregnant women receiving infant feeding counselling                                        | 243094003 | snomed | procedure | Breastfeeding education and assessment | VISIT_TYPE = ANC |
+|5p           |Pregnant women at below 25 YEARs receiving first HIV test                                  | 171121004 | snomed | procedure | HIV test | VISIT_TYPE = ANC and HIV_TEST = 1 and age < 25 | 
+|6a           |Pregnant women receiving LLIN                                                              | ? | snomed | procedure | Mosquito net | VISIT_TYPE = ANC |
+|6b           |Pregnant women testing Malaria using MRDT/BS                                               | 412690006 | snomed | procedure | Malaria Rapid Test | VISIT_TYPE = ANC | 
+|6b           |Pregnant women testing Malaria using MRDT/BS                                               | ? | snomed | procedure | %MRDT% | VISIT_TYPE = ANC | 
+|6c           |Pregnant women diagnosed with malaria                                                      | B54 | ICD10 | condition | Malaria | VISIT_TYPE = ANC |
+|6d           |Pregnant mothers given IPT2                                                                | 777371007 | snomed | procedure | SP tabs for Presumptive malaria treatment | VISIT_TYPE = ANC and MALARIA_TREATMENT = 2 |
+|6e           |Pregnant mothers given IPT3                                                                | 777371007 | snomed | procedure | SP tabs for Presumptive malaria treatment | VISIT_TYPE = ANC and MALARIA_TREATMENT = 3 |
+|6f           |Pregnant mothers given IPT4                                                                |777371007 | snomed | procedure | SP tabs for Presumptive malaria treatment | VISIT_TYPE = ANC and MALARIA_TREATMENT = 4 |
+|7            |Pregnant mothers given Iron/Folic Acid (I, F, IFA) (enough to last until next visit)       | 63718003 | snomed | procedure | Folic acid/Ferous | VISIT_TYPE = ANC |
+|7            |Pregnant mothers given Iron/Folic Acid (I, F, IFA) (enough to last until next visit)       | ? | snomed | procedure | Ferrous | VISIT_TYPE = ANC |
+|7            |Pregnant mothers given Iron/Folic Acid (I, F, IFA) (enough to last until next visit)       | 63718003 | snomed | procedure | Folic Acid | VISIT_TYPE = ANC |
+|7            |Pregnant mothers given Iron/Folic Acid (I, F, IFA) (enough to last until next visit)       | 387402000 | snomed | procedure | Ferrous Sulphate | VISIT_TYPE = ANC |
+|8            |Pregnant women given antihemitics (Albendazole /Mebendazole)                               | 387311004 | snomed | procedure | Mebendazole | VISIT_TYPE = ANC |
+|9            |Pregnant Women counselled for family planning                                              |397619005 | snomed | procedure | Family planning | VISIT_TYPE = ANC | 
+|10           |Pregnant Women referred                                                                    | na | na | serviceRequest | na | total nr of patients in referral table |
+|11           |Pregnant Women referred to CTC                                                             | na | na | serviceRequest | na | total nr of patients in referral table where reason is HIV |
+
+
+The info under extra filter mentions topic specific filter information. For questionnaire responses this includes the answer to the question. for many topics the VISIT TYPE (ANC, PNC or delivery) is of importance, therefore the VISIT_TYPE is often used as an extra filter. This information comes from the ENCOUNTER_RESOURCE. Besides this, for procedures and conditions, we have added calculated fields:
+
+* VISIT_TYPE_NO: the number of visit for a specific visit type (anc, pnc delivery)
+* VISIT_NO: the number of visit (each visit counts)
+* HIV_TEST: counts if it is the first second, third or xxxth HIV test
+* gestation_week: contains the week of gestation for a patient at the time of the visit.
+* age: age of the patient at enrollment 
+* MALARIA_TREATMENT: the number of malaria treatment 
+
+**delivery topics**
+
+| serial_number | description                                                      | code | system | origin | originial_description | extra filter |
+|---------------|------------------------------------------------------------------| ---|---|---|---|---|
+| 1             | Mothers expected /projected to deliver at service station        | na|na|Observation|na|use expected delivery date and count nr of unique patients|
+| 2a            | Mothers delivered at the facility                                |11466000|SNOMED|procedure|Cesarean Section|VISIT_TYPE = delivery|
+| 2a            | Mothers delivered at the facility                                |177184002|SNOMED|procedure|%Delivery%|VISIT_TYPE = delivery|
+| 2a            | Mothers delivered at the facility                                |237311001|SNOMED|procedure|Breech delivery|VISIT_TYPE = delivery|
+| 2b            | Deliveries/Birth before arrival at the facility (BBA)            |na|na|QuestionnaireResponse|%where was the baby born%|anser like %other%|
+| 2c            | Delivered by assistance of traditional birth attendants(TBA)     |na|na|questionnaireResponse|%was there a birth attendant present?%|answer=true|
+| 2d            | Delivered at home without assistance of TBA                      |na|na|questionnaireResponse|%was there a birth attendant present?%|answer=false|
+| 3a            | Delivered after 12 hours since onset of labour                   |O63|ICD10|condition|Long labour|VISIT_TYPE = delivery|
+| 4b            | Vacuum (MV)                                                      |?|SNOMED|procedure|Vacuum (VM)|VISIT_TYPE = delivery|
+| 4c            | Breech delivery (BR)                                             |237311001|SNOMED|procedure|Breech delivery|VISIT_TYPE = delivery|
+| 4d            | Caesarian section (CS)                                           |11466000|SNOMED|procedure|Cesarean Section|VISIT_TYPE = delivery|
+| 5a            | APH                                                              |O46|ICD10|condition|Antepartum Hemorrhage|VISIT_TYPE = ANC|
+| 5c            | High Blood Pressure                                              |O13|ICD10|condition|Pregnancy - induced hypertension|VISIT_TYPE = ANC|
+| 5d            | Pre-eclampsia                                                    |O14|ICD10|condition|Pre - eclampsia|VISIT_TYPE = ANC|
+| 5e            | Eclampsia                                                        |O15.0|ICD10|condition|Eclampsia|VISIT_TYPE = ANC|
+| 5f            | Malaria                                                          |B54|ICD10|condition|Malaria|VISIT_TYPE = ANC|
+| 5g            | Anaemia                                                          |O99.0|ICD10|condition|Anaemia in pregnancy|VISIT_TYPE = ANC|
+| 6a            | PPH                                                              |O72|ICD10|condition|Postpartum haemorrhage|VISIT_TYPE = PNC or delivery|
+| 6d            | Obstructed labour                                                |O64|ICD10|condition|Fetal Malpresentation|VISIT_TYPE = delivery|
+| 6d            | Obstructed labour                                                |O65|ICD10|condition|Pelvic abnormality|VISIT_TYPE = delivery|
+| 6d            | Obstructed labour                                                |O66|ICD10|condition|Other obstructed labour|VISIT_TYPE = delivery|
+| 6e            | Retained placenta                                                |O73|ICD10|condition|Retained placenta and membranes, without haemorrhage|VISIT_TYPE = delivery|
+| 6h            | Sepsis                                                           |O85|ICD10|condition|Puerperal Sepsis|VISIT_TYPE = PNC|
+| 7a            | Received antibiotic                                              |255631004|SNOMED|procedure|Antibiotics|VISIT_TYPE = delivery|
+| 7b            | Given uterotonic                                                 |?|SNOMED|procedure|Uterotonics|VISIT_TYPE = delivery|
+| 7c            | Given magnesium sulphate                                         |387202002|SNOMED|procedure|Magnesium Sulphate|VISIT_TYPE = delievery|
+| 7d            | Placenta removed manually                                        |?|SNOMED|procedure|Manual removal of placenta|VISIT_TYPE = delivery|
+| 7f            | Received blood transfusion                                       |116859006|SNOMED|procedure|Blood transfusion|VISIT_TYPE = delivery|
+| 8c            | Women received oxytocin after delivery                           |777037006|SNOMED|procedure|Oxytocin|VISIT_TYPE = delivery|
+| 8d            | Women received egometrine after delivery                         |126071000|SNOMED|procedure|Egometrine|VISIT_TYPE = delivery|
+| 8e            | Women received Misoprostol after delivery                        |776804001|SNOMED|procedure|Misoprostol|VISIT_TYPE = delivery|
+| 9a            | Total tested HIV at ANC                                          |171121004|SNOMED|procedure|HIV test|VISIT_TYPE = ANC|
+| 9b            | Tested positive at ANC                                           |O98.7|ICD10|condition|HIV in pregnancy|VISIT_TYPE = ANC|
+| 9c            | Total tested HIV during and after delivery                       |171121004|SNOMED|procedure|HIV test|VISIT_TYPE = delivery or PNC|
+| 9d            | Tested positive during and after delivery                        |O98.7|ICD10|condition|HIV in pregnancy|VISIT_TYPE = delivery or PNC|
+| 9e            | Opted for exclusive breast feeding (EBF)                         |na|na|questionnaireResponse|%MomCare: Je una mpango wa kunyonyesha mtoto kwa%|answer like %Mfululizo kwa miezi 6 bila chakula kingine%|
+| 9f            | Those Opted for alternative feeding(RF)                          |na|na|questionnaireResponse|%MomCare: Je una mpango wa kunyonyesha mtoto kwa%| answer like %Kumpa maziwa ya mama na chakula kingine%|
+| 9f            | Those Opted for alternative feeding(RF)                          |na|na|questionnaireResponse|%MomCare: Je una mpango wa kunyonyesha mtoto kwa%| answer like %Hutanyonyesha kabisa%|
+| 9g            | Given ARV prophylaxis (Tail) at time of discharge                |713540004|SNOMED|procedure|ARV prophylaxis|VISIT_TYPE = delivery|
+| 9h            | Mothers given referral to CTC clinic                             |na|na|serviceRequest|na|patients in serviceRequests where reason = HIV|
+| 10a           | Total number of children born alive                              | 
+| 10b           | Born alive with weight less than 2.5 kg                          |P05.0|ICD10|condition|Low Birth weight (< 2499 grams)| VISIT_TYPE = delivery |
+| 10c           | Children born alive with weight =>2.5 kg                         |P05.0|ICD10|condition|Low Birth weight (< 2499 grams)| VISIT_TYPE = delivery and make sure condition is NOT met |
+| 10e           | Baby  Born  fresh dead (FSB)                                     |P95|ICD10|condition|Stillbirth (FSB)|VISIT_TYPE = delivery|
+| 10f           | Baby Born with HIV-positive mothers                              |O98.7|ICD10|condition|HIV in pregnancy|VISIT_TYPE = delivery|
+| 10g           | Baby  received ARV drugs                                         |713540004 | SNOMED | procedure |ARV prophylaxis|VISIT_TYPE = delivery|
+| 12a           | Number of babies received breathing assistance by suction        |232705007 | SNOMED | procedure |Baby breathing assistance - sunction| VISIT_TYPE = delivery|
+| 12b           | Number of babies  received breathing assistance by stimulation   |1230275006|SNOMED|procedure|Baby breathing assistance - stimulation|VISIT_TYPE = delivery|
+| 12c           | Number of baby received breathing assistance by by Bag and Mask  |?|SNOMED|procedure|Baby breathing assistance - bag and mask|VISIT_TYPE = delivery|
+| 13a           | Number of babies who were breastfeed within one hour after birth |243094003|SNOMED|procedure|Breastfeeding education and assessment|VISIT_TYPE = delivery|
+| 13b           | Number of mothers who were given referral                        | na | na | serviceRequest | na | total nr of patients in referral table |
+| 14a           | Maternal death occurred                                          |O95|ICD10|condition|Maternal death|VISIT_TYPE = delivery|
+| 15a           | Given counselling of family planning                             |397619005|SNOMED|procedure|Family planning|VISIT_TYPE = PNC|
+| 15b           | Client who does total hysterectomy                               |236886002|SNOMED|procedure|Hysterectomy|na|
+| 15c           | Client for whom IUCD was inserted                                |176837007|SNOMED|procedure|IUCD|na|
+| 15d           | Client with inserted Norplant                                    |169553002|SNOMED|procedure|%Norplant%|na|
+| 15e           | Client received POP                                              |255664004|SNOMED|procedure|pop|na|
+| 16a           | New baby born died                                               |P96.8|ICD10|condition|Neonatal death|na|
+
+Again the info under extra filter can be the answer to a question or the VISIT_TYPE as explained for the ANC topics. For delivery report no calculated fiels were required.
+
+**pnc**
+
+|   serial_code  |   Decription                                                                           | Code | System | origin | original_description | extra filtering |
+|----------------|----------------------------------------------------------------------------------------|------|--------|--------|----------------------|-----------------|
+|   1a           |   Toatal number of clients attendees within 48hs||        |        |                      |                 |
+|   1b           |   Total number of clients attendees 3-7 days|na|na|combined metric|na|3<= DAYS_SINCE_DELIVERY <= 7|
+|   1c           |   Total number of atendees within 7 days (1a+1b)|na|na|combined metric|na|DAYS_SINCE_DELIVERY<=7|
+|   2            |   Total number of clients who finished all attendee (48hrs, 3-7days, 8-28days, 29-42)|na|na|combined metric|na|DAYS_SINCE_DELIVERY <= 42|
+|   3            |   Clients with severe anaemia (HB<8.5g/dl) | O99.0|ICD10|condition|Anaemia in pregnancy|VISIT_TYPE = PNC|
+|   4            |   Clients who had mental disorder after delivery  |    F53.9  |ICD10| condition |Puerperal Mental Disorder, Unspecified|VISIT_TYPE = PNC|
+|   5            |   Client given vitamin A                                                               |  3692241100000111    |    SNOMED    |    procedure    | Vitamin A | VISIT_TYPE = PNC|
+|   6            |   Clients with infected perineal tear   |     O90.1 |   ICD10 |condition|Perineal tear infections|VISIT_TYPE = PNC|
+|   7            |   Client with Fistula |N82|ICD10|condition|?|VISIT_TYPE = PNC|
+|   8            |   Delivered out of health facility|na|na|combined metric|na|check patients whose expected delivery date is passed by 14 days and who did not have a delivery visit|
+|   8a           |   Delivered before arrival to health facility (BBA)|na|na|questionnaireResponse|%where was the baby born%|answer = other|
+|   8b           |   Delivered at traditional birth attendant (TBA)|na|na|questionnaireResponse|%was there a birth attendant present?%|true|
+|   8c           |   Home deliveries|na|na|questionnaireResponse|%where was the baby born%|home|
+|   9a           |   Counselled on family planning|397619005|SNOMED|procedure|Family planning|VISIT_TYPE = PNC|
+|   9b           |   Given Condom|339731000000107|SNOMED|procedure|Condom|VISIT_TYPE = PNC|
+|   9c           |   Given Pills (POP)|255664004|SNOMED|procedure|POP|VISIT_TYPE = PNC|
+|   9d1          |   Given norplants (Implanon)|169553002|SNOMED|procedure|Norplant|VISIT_TYPE = PNC|
+|   9d2          |   Given norplants (Jadele)|169553002|SNOMED|procedure|Norplant (Jadele)|VISIT_TYPE = PNC|
+|   9e           |   Given inter uterine device|176837007|SNOMED|procedure|IUCD|VISIT_TYPE = PNC|
+|   9f           |   Sterilization (BTL)|287664005|SNOMED|procedure|Sterilization (BTL)|VISIT_TYPE = PNC|
+|   10           |   PMTCT|?|SNOMED|procedure|PMTCT|na|
+|   10b          |   HIV tested during postnatal (within 42days since delivery)|171121004|SNOMED|procedure|HIV test|VISIT_TYPE = PNC|
+|   10c          |   Diagnosed with HIV during post natal (within 42 days since delivery)|O98.7|ICD10|condition|HIV in pregnancy|VISIT_TYPE = PNC|
+|   10d          |   Clients with HIV who opted for exclusive breast feeding (EBF)|na|na|questionnaireResponse|%MomCare: Je una mpango wa kunyonyesha mtoto kwa%|answer ilike %Mfululizo kwa miezi 6 bila chakula kingine%|
+|   10e          |   Clients with HIV who opted for replacement feeding (RF)|na|na|questionnaireResponse|%MomCare: Je una mpango wa kunyonyesha mtoto kwa%|answer ilike %Kumpa maziwa ya mama na chakula kingine%|
+|   10e          |   Clients with HIV who opted for replacement feeding (RF)|na|na|questionnaireResponse|%MomCare: Je una mpango wa kunyonyesha mtoto kwa%|%Hutanyonyesha kabisa%|
+
+
+## Updating DHIS2 Topics
+It is possible that the method to calculate certain DHIS2 topics must be updated. To do so there are multiple options:
+
+* Alter or add to the mapping tables that are used to map the patient_timeline information. The mapping tables can be found under *data/external*. When creating a mapping table with a new name, this must be updated in the configuration of the DHIS2 reporter, which can be found under *src/data/config.py*.
+* Alter or add to the mapping tables that are used to map the questionnaire_response information. The mapping tables can be found under *data/external*. When creating a mapping table with a new name, this must be updated in the configuration of the DHIS2 reporter, which can be found under *src/data/config.py*.
+* add to the mapping queries. If it is only one topic it can be more convenient to add an extra piece in the mapping query for that topic. It is a bit of seeking for a balance to apply filtering via a mapping table (when the same columns are filtered for multiple topics) or to add a separate piece of code to the mapping query (when filtering only applies to that specific topic). For each report there is a separate mapping one can add to *add_anc_mapping*, *add_delivery_mapping*, *add_pnc_mapping*. These queries can be found under *scr/data/SQL_queries*.
+
+## DHIS2 TODO
+Still not all DHIS2 topics have been implemented in the reports:
+
+* Twin related topics in delivery report: There are topics about twins that were not available in the current reports yet, but calculations are available in Andreas' mapping code, that have yet to be converted in the DHIS2 reporter class
+* anc report topic: Pregnant women tested for HIV with spouse/partner. Currently checked if visit_type = ANC and if tested for HIV. but 'with spouse/parter' is unclear
+* anc report topic: Pregnant women testing Malaria using MRDT/BS. Now it is only checed if malaria rapid test, but this should also include visit items like MRDT. MRDT is not yet mapped to fhir, because type = null, and we only mapped where type is drug or test.
+* anc report topic: Pregnant Women counselled for family planning. this item is always classified as PNC, so either it does not occur in anc or something is missed.
+* delivery report topic: VACUUM (MV). mapping already prepared, but this visit item is not yet mapped to fhir, because type is equipment and not drug or test.
+* delivery report topic: Placenta removed manually. mapping already prepared, but item is not yet mapped to fhir. because type is null (not test or drug)
+* delivery and anc report referral related topics: Now all referral patients are used for calculations, where previously only 'mother' type patients were evaluated. This information is not mapped to fhir, are non-mother patients filtered out? 
+* Evaluation: There are big differences with the previous DHIS2 reports that were based on COT data directly. Some differences were intended, some are not yet explained. This should be further investigated.
+
+## USING DHIS2reporter
+**TODO:** Update steps below based on updated code for the Reporter!
+Assuming one works with the cookie cutter template the DHIS2 reporter can be used as follows:
+
+1. run jupyter notebook (make jupyter)
+2. create a new jupyter notebook
+3. make sure the nescessary libraries are loaded in jupyter: 
+```python
+#standard data wrangling libraries
+import pandas as pd
+import numpy as np
+
+# to get linking to paths correct: when working from the notebooks folder, you only have to navigate one path up ('../'), but from another folder (maybe one inside the notebooks folder) you might need to navigate more paths up.
+#TODO: currently one has to manually redirect to the main (work folder). Later this should be more user friendly. 
+import sys
+sys.path.append('../')
+
+# duckdb
+#TODO: we now created a duckdb class, which is not really nescessary, but it makes the linking to the duckdb file a bit easier.
+import duckdb
+from src.data.duck_db_class import DUCKDB
+
+#DHIS2 reports
+from src.data.DHIS2_reporting import DHIS2_reports
+```
+4. connect to duckdb (currently with separate duckdb class but can also be done without!)
+```python
+db = DUCKDB('momCareDBv0.8.0','../work')
+connection = db.connect()
+```
+5. initialize reporter with the connection and location of the main folder
+```python
+reporter = DHIS2_reports(connection,'../work')
+```
+6. prepare mapping tables. In this step the mapping tables are created (overwritten). This step is not nescessary if the mapping tables are already up to date.
+```python
+reporter.prepare_mapping_tables()
+```
+7. clear intermediate tables, to create the DHIS2 reports we need soe intermediat tables like the patient_timeline and questionnaire_responses, old tables should for now be removed.
+```python
+reporter.clear_intermediate_tables()
+```
+8. create the intermediate table questionnaire_response and patient_timeline.
+```python
+reporter.create_questionnaire_table()
+reporter.prepare_patient_timeline()
+```
+9. create the DHIS2 report, depending on the desired report run:
+```python
+df = reporter.create_anc_report()
+df = reporter.create_delivery_report()
+df = reporter.create_pnc_report()
+```
+10. the result will be outputted in a dataframe as well as stored in duckdb in the table processed.DHIS2_anc_report / processed.DHIS2_delivery_report / processed.DHIS2_pnc_report
+
+
+
+

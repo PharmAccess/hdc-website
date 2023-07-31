@@ -1,0 +1,58 @@
+---
+title: Shared Health Record
+---
+
+## A FHIR-based Shared Health Record
+
+The Shared Health Record (SHR) facilitates the sharing of clinical information between health information systems to enable better patient care, thus improving health outcomes.^[This introduction is taken from [OpenHIE](https://guides.ohie.org/arch-spec/openhie-component-specifications-1/openhie-shared-health-record-shr).]  The SHR is a means of allowing different services to share health data stored in a centralized data repository.  It contains a subset of normalized data for a patient from various systems such as an electronic medical record or the Laboratory Information Management System. This record is queried and updated between the different institutions and systems that are authorized to do so.  The SHR is distinct from a data warehouse; it is an operational, real-time transactional data source.
+
+A shared health record is normalised if all metadata items such as patient, provider, and facility identifiers are resolved to appropriate universal identifiers (as opposed to their local identifiers as used by a client system). In addition, all terminology codes in use need to be mapped to an appropriate reference terminology to ensure that the information is consistently understood.
+
+One of the key choices for the HDC platform is to use use the FHIR standard to realize the SHR service. In doing so, a number of design choices need to be addressed.
+
+### Using FHIR as a persistent data store
+
+FHIR was originally designed for exchanging data only. With the advent of Bulk FHIR API, it is increasingly being used as a standard for persisting a combined record like the SHR specification. In fact, by implementing a FHIR facade with an intermediate server as described in @sec-fhir-facade, one can imagine that such an intermediate server can in fact function as the SHR if it were to collect and integrate data from various (legacy) Point-of-Service systems. Taking this one step further, so-called approaches for "analytics-on-FHIR" are under active development. The Open Health Stack ([OHS](https://developers.google.com/open-health-stack/overview)), for example, includes detailed designs and reference implementations for so-called FHIR Analytics shown in @fig-ohs-fhir-analytics. These solution aim to reduce the impedence mismatch between the heavily nested structure of FHIR Resources and the need for having the data readily available in tabular format for analysis using SQL. Many major cloud providers provide persistent FHIR data storage solutions, including [Google FHIR Store](https://cloud.google.com/healthcare-api/docs/how-tos/fhir),  [Azure Health Data Services](https://learn.microsoft.com/en-us/azure/healthcare-apis/) and [Amazon HealthLake](https://docs.aws.amazon.com/healthlake/latest/devguide/working-with-FHIR-healthlake.html).
+
+![Open Health Stack FHIR Analytics](./images/ohs-diagram-analytics.png){#fig-ohs-fhir-analytics}
+
+It is within the context of these technological developments that we have chosen to adopt FHIR as the core standard for SHR. Nevertheless, it is 
+@pedrera-jimenez2022can : FHIR not the preferred choice for persistent record. Still, we do take that approach because
+- our use-cases are relatively simple --> FHIR semantics are sufficient, no need to more detail clinical models
+- bet on wide-scale adoption by industry and vendors, much more so than OpenEHR and ISO
+- We take potential technical debt of upgrading versions in future for granted
+
+### Versions and profiles
+
+- Choose for IPS as profile plus additions
+  - Encounter
+  - ServiceRequest: referrals
+  - Questionnaire
+  - QuestionnaireResponse
+
+### Resources versus Bundles 
+
+Certainly! In FHIR (Fast Healthcare Interoperability Resources), there is a distinction between FHIR resources and FHIR documents. Let's delve into the details:
+
+1. FHIR Resource: 
+A FHIR resource is an atomic unit of information in the FHIR specification. It represents a discrete piece of healthcare-related data. Each FHIR resource is designed to capture specific types of information, such as patient demographics, allergies, medications, lab results, or clinical observations. Examples of FHIR resources include Patient, Observation, MedicationStatement, AllergyIntolerance, and Condition.
+
+FHIR resources follow a standardized structure defined by the FHIR specification. They consist of a set of elements that hold the data, including attributes, extensions, and references to other resources. Resources can be uniquely identified and can be accessed, created, updated, or deleted independently. They are designed to be granular and reusable, allowing for efficient exchange and interoperability of healthcare data.
+
+2. FHIR Document:
+A FHIR document, also known as a FHIR bundle, is a collection of FHIR resources grouped together for a specific purpose or context. It serves as a container for organizing related resources into a single entity. FHIR documents are used to transmit or exchange multiple resources as a single unit.
+
+A FHIR document can include different types of resources, such as patient records, clinical notes, diagnostic reports, or care plans. For example, a discharge summary document may contain a Patient resource, Condition resources representing diagnoses, MedicationStatement resources for prescribed medications, and other relevant resources.
+
+FHIR documents provide a convenient way to package and transmit multiple resources together, maintaining their relationships and context. They allow for the exchange of comprehensive and structured healthcare information, facilitating interoperability between systems and supporting clinical workflows.
+
+In summary, a FHIR resource represents a discrete piece of healthcare data, whereas a FHIR document is a collection of related resources grouped together for a specific purpose or context. FHIR resources provide granular and reusable units of information, while FHIR documents enable the transmission and organization of multiple resources as a single entity.
+
+
+
+## Chosen technologies for data layer
+
+- SQL
+- duckdb
+- arrow & parquet, reference @liu2020high
+- 

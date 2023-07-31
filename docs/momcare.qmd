@@ -1,0 +1,149 @@
+---
+title: MomCare Tanzania
+---
+
+## The MomCare programme
+
+STORYLINE: FROM SHOWING HOW LOCAL DIGITIZATION/TRANSPARENCY LEADS TO BETTER JOURNEYS TO DEMONSTRATING THAT THIS CAN BE DONE PLATFORM AGNOSTICALLY. AND HOW THIS CAN LEAD TO EVEN BETTER JOURNEYS.
+
+In Sub-Saharan Africa, 200,000 women die annually from pregnancy-related complications, representing 68% of maternal deaths worldwide. Value-based healthcare (VBHC) could help improve maternal and neonatal health outcomes, by promoting a data-driven and patient-centered approach. This presentation will highlight the impact, lessons, and feasibility of implementing VBHC for maternal, neonatal and child health (MNCH) in LMICs., Improving MNCH outcomes requires early and regular antenatal care, facility-based delivery, and postnatal care, tailored to the needs of individual mothers. Therefore, PharmAccess launched ‘MomCare’ in Kenya in 2017 followed by Tanzania in 2019 ^[For more background, see @huisman2022digital, @sanctis2022maintaining, @shija2021access and @mrema2021applicationa].
+
+Using the VBHC framework, MomCare incorporates three dimensions of care, namely i) financing for a package of maternal care; ii) quality standards (SafeCare) for healthcare providers and iii) actionable data to incentivize patient and provider behaviors (@fig-momcare). Mothers received a digital wallet (M-TIBA in Kenya) that entitled them to a care bundle encompassing the entire pregnancy journey including postnatal and neonatal care. Quality assessment was done through SafeCare during onboarding and repeated every year. Women consented to data- collection through claims / data entry systems, sms-surveys and call surveys. This allowed us to track utilization behavior, well-being, care experience and outcomes throughout the journey as well as risk-mitigation by clinics. We implemented a pay- for-performance model and created dashboards with insights and benchmarking information. Clinics received actionable feedback including risk stratification and an overview of mothers to call to encourage facility-based delivery. Field teams supported clinics through periodical data-based feedback sessions to stimulate continuous quality improvement.
+
+![Dimensions of the MomCare programme](images/momcare.png){#fig-momcare}
+
+MomCare has been implemented in over 70 clinics across Tanzania and Kenya, supporting over 55,000 mothers. Throughout the program we measured improved adherence to maternal care, better SafeCare scores and improved risk mitigation. Providers actively engaged with data-based insights, actionable feedback, and the pay-for-performance system. We were able to identify unmet needs like mental health support for (teenage) mothers or breastfeeding support and adapted the care bundle accordingly. Importantly, the program brought transparency on risk mitigation and costs. MomCare is proof that VBHC can be successfully implemented in LMICs to improve maternal care.
+
+
+## Tracking the journey of pregnant mothers
+
+MomCare distinguishes two user groups, each supported with a specific type of mobile device (@fig-devices). Interaction and communication with mothers is facilitated through a feature phone (@fig-feature-phone), which enables them to access a mobile wallet, obtain coverage for services including antenatal checkups, delivery (normal & C-section), post-natal checkups and immunizations. Pregnant mother are reminded of their upcoming visits through SMS. SMS is also used to send questionnaires to the mother about her care experience and wellbeing.
+
+Health workers are equipped with an Android tablets through which they can access and use an app in which visits, care activities and clinical observations are recorded (@fig-tablet). The app is designed to give actionable feedback and insights to facilitate daily operations. Questionnaires to assess living conditions and comorbidities are also collected through the app. Note that the exact technical details of the app vary between Kenya and Tanzania, which will be discussed in more detail later.
+
+Finally, providers have access to dashboards that provide insight on their patient population, quality of the journeys and allow benchmarking with other facilities.
+
+!! Better to turn table below into graphic and demonstrate data exchange needs !!
+
+|          | User                      | Functionality                                     | Hardware                   | Software            |
+| -------- | ------------------------- | ------------------------------------------------- | -------------------------- | ------------------- |
+| Kenya    | Clinician                 | Billing \*                                        | Paper billing form         | \-                  |
+|          | Billing clerk             | Billing                                           |                            | MTIBA               |
+|          | Clinician                 | Recording medical history                         | Purple booklet             | \-                  |
+|          | Payment provider          | Process payments                                  | Computer                   | MTIBA & Mpesa (?)   |
+|          | Mother                    | Education, keeping medical history, entitlement   | Purple booklet             | \-                  |
+|          | Kenyan clincian (nurse)   | Journey tracking                                  | Computer or Android tablet | Patient Journey App |
+|          | Clinic management (Kenya) | Feedback                                          |                            | PowerBI dashboard   |
+|          |                           |                                                   |                            |                     |
+|          | Mother                    | Receive appointment reminders and give feedback   | (Feature) phone            | SMS                 |
+|          | Call center agent         | Plan and calls and record questionnaire responses | Computer (?)               | SurveyID            |
+|          | Mother                    | Provide end of journey feedback                   | (Feature) phone            | Call                |
+|          |                           |                                                   |                            |                     |
+| Tanzania | Clinician                 | Recording medical history and billing             |                            |                     |
+|          | Payer (PAF)               |                                                   |                            | Excel               |
+|          | etc                       |                                                   |                            |                     |
+|          | etc                       |                                                   |                            |                     |
+
+:::{#fig-devices layout-ncol=2}
+
+![Feature phone used by pregnant women](images/feature-phone.png){#fig-feature-phone}
+
+![Android tablet used by health workers](images/tablet.png){#fig-tablet}
+
+Mobile devices used in MomCare programme
+:::
+
+Reimbursements of the maternal clinic are based on the data captured with SMS and the app, thereby creating a conditional payment scheme, where providers are partially reimbursed up-front for a fixed bundle of activities, supplemented by bonus payments based on a predefined set of care activities.
+TO DO: explain conditional pyament scheme here (@fig-pregnancy-journey).
+
+## Payment Model Types
+### Payer / clinic perspective
+- per-visit-bundles
+- journey score
+- value points
+- capitation
+- incentives for mothers
+TO DO: elaborate above
+
+### Mother perspective
+- quotes from mothers (Liam)
+
+## Care Model Interventions
+- ambulance
+- Moms2Be
+- mental health
+
+![pregnancy journey](images/pregnancy-journey.png){#fig-pregnancy-journey}
+
+TO DO: add graphs with results.
+
+## Data collection
+- MTIBA
+- PJA
+- CoT
+- SMS
+- End of Journey calls
+
+As fragmented as the above data collection appears, this does represent
+
+## MomCare App & Dashboards
+- data collection (CoT)
+- operational support (PJA & CoT)
+- Dashboards
+    
+
+
+## Current limitations and challenges
+
+Manyara region has reques
+Challenges: 
+TO DO: explain the main drivers/issues that we want to address with the demonstrator
+Hanang wants full district view and we are looking at sustainability:
+MomCare apps are maternity only + custom made = conflict
+Various systems in public / FBO/
+
+### Lack of visibility outside MomCare network
+#### Pregnancy starts and continues at home
+- may be in community health system
+- may already need advice or mental healthcare that can be given remotely
+#### Delivery / referral elsewhere
+- we don't see the mother
+- providers don't see her data leading to worse care
+Pregnancy journeys are more than just clinic visits. Women tend to be pregnant for a long time before they have their first ANC and may already have a need for (mental) healthcare advice or information on pregnancy. 
+#### Real-life implementation requires combining data services from multiple individual services
+- entitlement 
+- 'brick' clinical services
+- 'click' clinical services
+- community clinical services
+- payments, visibility and execution
+- PROMs collection
+
+
+### Non-standard implementation stand in the way of scaling up data exchange
+
+In its current form, the MomCare programme uses custom-made digital platforms. In Kenya, M-TIBA is the primary digital platform, on top of which a relatively lightweight custom app has been built as the engagement layer for the health workers. M-TIBA provides data access through its data warehouse platform for the MomCare programme, however, this is not a standardized, general purpose API. In the case of Tanzania, a stand-alone custom app is used which does not provide an interface of any kind for interacting with the platform. Given these constraints, to date the MomCare programme uses a custom-built data warehouse environment as its main data platform, on which data extractions, transformations and analysis are performed to generate the operational reports. Feedback reports for the health workers, in the form of operational dashboards, are made accessible through the app. Similar reports are provided to the back-office for the periodic reimbursement to the clinics.
+
+### Double-entry
+
+In summary, if we want to scale-up, we want to standardize this approach. This leads us to the demonstrator in Tanzania, explained in the next chapter.
+
+## MomCare Tanzania as our testbed
+
+MomCare Tanzania has bee operational since 2019. Initially, the data gathering and feedback was part of a performance based program called ‘Tumaini la Mama’. When this program ended, the journey tracking became part of the MomCare programme. Recently Manyara regional authority (see @fig-manyara) has approached PharmAccess to continue providing data and transparency on pregnancy journeys and scale it up to the full district of Hanang (approximately 17.000 pregnancies per year). The district is reported to have low performance in maternal indicators as compared with other districts in the region. There are 35 clinics in the district:
+
+- 9 clinics already in MomCare
+- 18 with reasonable connectivity – can onboard without changes
+- 8 with intermittent connectivity – need an upgrade of the app to onboard 
+
+![Manyara region, Tanzania. The regional capital is the town of Babati. According to the 2012 national census, the region had a population of 1,4 million, which was lower than the pre-census projection of 1,5 million.](./images/manyara.png){#fig-manyara}
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,120 @@
+# Value Points
+## Introduction
+A clinic can earn value points by performing different clinical actions part of the 
+
+## ValuePoint criteria
+
+### Obtained Value Points
+
+There are six topics for which a mother can earn value points  
+
+**ANC profile**: To collect mothers who had an ANC profile, we check for visits that include the following procedures 
+
+* vdrl  
+* hemoglobin  
+* blood grouping  
+* HIV test  
+* blood pressure  
+* urine test 
+
+In addition, the ANC profile should also take place during the first visit. 
+
+**Early ANC**: We check for ANC visits within the first 12 weeks of pregnancy 
+
+**Ultrasound before end of second trimester**: We check for visits with an ultrasound procedure that occurred within the first 24 weeks of pregnancy. 
+
+**4ANC**: we check which mothers have at least 4 ANC visits. Clinics receive 0.5 points per visit for the first 4 visits. For further ANC visits no more points are received. 
+
+**Facility Based Delivery**: we filter mothers that have had a delivery visit. 
+
+**2PNC**: we check which mothers have 2 PNC visits. Clinics receive 0.5 points per visit for the first 2 visits. For further PNC visits no more points can be obtained. 
+
+There is a limited time in which the different value points can be obtained. The cut-off date and the total  number of value points that can be obtained for each topic are displayed in the graph below. The week of pregnancy for a mother is calculated based on her Expected Delivery Date (EDD).  
+
+|Criterium | Points | Cut-off-date|
+|---|---|---|
+|ANC profile| 1|12 weeks |
+|Early ANC|1|24 weeks|
+|Ultrasound before end of second trimester|1|24 weeks|
+|4ANC|2|42 weeks|
+|Facility Based Delivery|4|42 weeks|
+|2PNCs|1|44 weeks|
+
+The date assigned to an obtained value point is the date that a procedure was performed. 
+
+**TODO**
+2PNC should be checked if the PNC visits occured in first twee weeks after delivery (if delivered at facility) or if not delivered at facility if PNC visit is within 4 weeks of EDD. Currently just taken one cutof date.. 
+
+**Note on difference in pregnancy weeks in speaking and coding terms**
+When stating week 12 as cut-off date, it is meant to be up to and including the 12th week of pregnancy, while In code this will be anything below 12: 
+To clarify:  a mother is pregnant for 86 days: 86/7 = 12.2 weeks. We would say the mother is in her 13th week of pregnancy, and thus the mother has passed this cut-off date. In code, we check whether the week is <=12 which is false and thus we the cut-off date was passed. 
+
+### Missed Value Points
+If a mother does not obtain a value point before the cut-off date, we consider this value point as missed. Missed value points are coupled to a missed date. The missed date is calculated based on the EDD and the cut-off weeks. 
+
+A mother can go to different clinics during her journey. At this point, we only calculate missed value points for the clinic where the mother had her first visit. 
+
+### Attainable Value Points
+Attainable points are only calculated for the current date and defined for any topic that has not yet been obtained, but where the current date is less than the missed date. 
+
+Attainable points are only given to the clinic where the mother had her first visit. 
+
+## Shared Value POints
+As mentioned above a mother can visit different clinics. For this reason, the concept of shared value points was introduced.  
+Value points can be shared for: 
+
+* Ultrasound  
+* 4 ANC 
+* Facility Based Delivery 
+* 2 PNC 
+
+For Ultrasound and Facility Based DElivery the value points are always shared between the clinic where the procedure took place (procedure clinic) and the clinic where the first visit took place (enrollment clinic). The value points are shared as follows: 
+
+| Criterium | Points Procedure clinic | Points enrollment clinic | 
+|---|---|---|
+| Ultrasound | 0.75 | 0.25 |
+| Facility Based Delivery | 3 | 1 |
+
+The date for these shared value points is defined as the date that the procedure was performed. 
+
+For the 4ANC and 2PNC criteria, a clinic only obtains value points if the mother had equal or more than 4 ANC visits or equal or more than 2 PNC visits in total. For each visit up to the 4th (ANC) or 2nd (PNC) visit a clinic receives 0.5 Value Points. For further visits, no value points are obtained. 
+
+### Mothers per trimester
+The mothers per trimester table shows the number of mothers that have visited the clinic and have an active journey (within EDD + four weeks) per month. Mothers are shown that have visited the clinic at least once during their journey. AS a mother can fall in two trimesters within one month, we have decided to show the status at the 1st of the month. 
+
+The mothers are divided in the different trimesters as follows:  
+
+|trimester | start | end |
+|---|---|---|
+|first | week 1 | week 12 |
+|second | week 13 | week 26 |
+|third | week 27 | week 42 or date of delivery |
+|past EDD | week 42 or date of delivery | week 46 |
+
+
+## Value Points Reporter
+Like the DHIS2 reporter the value points reporter uses the base tables created by the base reporter (see @fig-ValuePoints-reporter) 
+
+![Value Points reporting flow and required input, blue: intermediate data, green: processed data](./images/value_points_reporter.png){#fig-ValuePoints-reporter}
+
+After the base tables are created, the value points reporter has a function to enrich the base tables with elements that help with value point calculations.
+
+Then, the value points base report is created, which contains for each patient and clinic, the value points that have been obtaned. This table is called the value_points_base table.
+
+All the tables that are used in the value points dashboard are then created based on the value_poiints_base tables.
+
+Finally, The results are saved in a separate DuckDB file and uploaded to Azure storage bucket.
+
+**NOTE** we agreed to only show data in the valuepoints dashboard that were created from 01-03-2023 onwards.
+
+**TODO**
+
+Currently the Value Points Code contains a function to export the valuepoints tables as a separate duckdb. The way this is done is a bit cumbersome: 
+first we copy the duckdb file that contains all data (also the raw data). Then we remove all schemas from there. Therafter we export the database, and import it again in a new duckdb file. 
+
+We have to export the database without schemas because it became very big (around 700MB) and removing schemas and tables did not bring the size down. The only method to bring the size down is currently to export the tables needed and import them again, then the size is around 1 MB. 
+
+In the future, there is a function *Vacuum*, which now does not seem to work, but is expected to remove all unnecessary space in a duckdb file? 
+
+## Use of value points reporter
+**TODO** Create a notebook as an example!

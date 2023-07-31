@@ -1,0 +1,94 @@
+# DataCare
+
+## Generic personas and user scenarios
+
+| Persona | User scenario |
+|:--------|:-------------|
+| Regional Officer | - Export DHIS2 compatible report |
+|                  | - Allow data probing for further insights |
+| KCMC researcher  | - Allow execution of scientific research question (TBD) on historical FHIR dataset |
+| Internation researcher | - Allow execution of scientific research question (TBD) on historical FHIR dataset |
+| MomCare Clinics | - Allow data probing for further insights |
+| PharmAccess data team | - Support operational app functionalities |
+|                       | - Serve dashboards |
+|                       | - Facilitate data delivery to (skilled) 3rd parties |
+|                       | - Facilitate internal ad-hoc analyses |
+
+: Persona's and user scenarios in scope of DataCare demonstrator. {#tbl-personas}
+
+(TO DO: finalize, and write non-technical user-stories with personas. That way, people can relate to it better, before we dive in to the nitty gritty details)
+
+## Towards FAIR data stations
+
+Inspired by the recent successes of @vanreisen2021design in implementing the VODAN-Africa data infrastructure for monitoring COVID-19, the technology strategy of DataCare is based on the idea of __applying principles of FAIR data for creating a FHIR-based ecosystem of data stations for sharing of routine health data__.
+
+FAIR data^[Read more on [Wikipedia](https://en.wikipedia.org/wiki/FAIR_data).] are data which meet principles of findability, accessibility, interoperability, and reusability. This concept has recently gained traction, particularly in the context of research data. The GO FAIR Initiative lists 18 implementation networks that are currently underway.^[See [GO FAIR website](https://www.go-fair.org) and specifically the page on [implementation networks](https://www.go-fair.org/implementation-networks/overview/). Last accessed 15th August 2022.] Implementation of FAIR data sharing ecosystems is guided through a three-point FAIRification framework^[Read more on [how to go FAIR](https://www.go-fair.org/how-to-go-fair/).]:
+
+1. Metadata for Machines: formulating machine-actionable metadata components
+2. FAIR Implementation Profile: a collection of FAIR implementation choices made by a community of practice for each of the FAIR Principles. Community specific FAIR Implementation Profiles are themselves captured as FAIR datasets and are made openly available to other communities for reuse.
+3. FAIR Data Points and FAIR Data objects: an "hourglass" approach to establish standard information exchange (see below for more details).
+
+## The Hourglass model
+
+Over the last few years, the importance of interoperability of systems and reuse of data has become evident. One of the key challenges in establishing interoperability the dilemma of how to start: start smaall, and run the risk of not achieving common standards. Start large, and get bogged down in talking rather than buiding a new standard infrastructure. To tackle this challenge, DataCare follows the concept of the "hourglass" model (@fig-hourglass). The hourglass model is an approach to layered system architecture where a middle layer is intentionally constricted in order to support flexibility in the implementation of layers above and below. Above the spanning layer are applications, and below the spanning layer are supports. @beck2019hourglass provides a formal analysis of the hourglass model which states that
+
+> _a weaker layer specification has fewer possible applications but more possible supporting layers than a stronger layer specification._
+
+![The hourglass model as first described by @beck2019hourglass](./images/go-fair-hourglass.png){#fig-hourglass}
+
+By adopting FAIR and FHIR, DataCare aims to take a plausible road towards an ecosystem of health data as a common good, namely:
+
+- Minimal standardization that makes data approachable for all parties is the system, including peer clinics, government, local tech providers, future AI applications etc.
+- Decentral storage in FAIR Data Station to prevent loss of control. Data does not sit with large central platforms but governance can be organised around the providers of the data. Note that use of replication i.e. backups may be chosen to ensure data availibility and support clinics with limited IT resources (servers, internet).
+- Use of open source implementations of each component as much as possible for the _supporting_ data layer. Specifically, choice of the FHIR Server and database are key and will be described in the operational section. 
+
+## High-level architecture
+
+### Design principles
+
+As explained above, the long term goal of DataCare is to create an ecosystem where health data can be re-used as a common good. Essentially, the DataCare project aims to demonstrate that it is possible to effectively create a decentralised data sharing infrastructure in LMICs with existing technologies, such that health data can be re-used for the common good. As illustrated in @fig-rationale, DataCare aims to improve the infrastructure layer to facilitate the use of health data in the other layers.
+
+![Rationale for DataCare project](./images/rationale.png){#fig-rationale}
+
+Whilst this desired outcome is far from certain, we believe the chance of systemic change is largest by adopting the following architectural design principles:
+
+- Design DataCare infrastructure using the FAIRification principles^[Read more on [how to go FAIR](https://www.go-fair.org/how-to-go-fair/)].
+- Strive for minimal standardization as proposed by the hourglass model^[[Beck (2019)](https://cacm.acm.org/magazines/2019/7/237714-on-the-hourglass-model/fulltext).], where FHIR is chosen as the _de facto_ standard for FAIR data exchange of routine health data.
+- Demonstrate a fully operational open source implementation of network of FAIR data stations in the spirit of the [Digital Public Goods Alliance](https://digitalpublicgoods.net/). 
+
+These principles are explained below.
+
+
+### FHIR-based FAIR data architecture
+
+Iterating on the VODAN-Africa design, DataCare essentially aims to implement a FHIR-based FAIR architecture, where each component of the VODAN-Africa data station (@fig-fair-components) has been replaced by its FHIR equivalent (@fig-target-architecture). Key elements of this design include:
+
+- Use of FAIR Data Objects (FDO) as foundational element in the overall architecture. In principle, FDOs constitute linked data objects. DataCare chooses to take a FHIR Resource as the foundational FDO. Although the current FHIR specification does not yet include a fully operational linked data structure, ongoing research and development have successfully implemented the FHIR standard into JSON-LD (see Solbrig et al. 2020).
+- The computing device with persistent storage that is to be implemented at each clinic runs a document store database. Apache CouchDB, MongoDB and RethinkDB are currently the most commonly used document stores. Our working assumption is that we will use CouchDB because it has been optimized for replication and offline-first user experience. CouchDB has a Apache license 2.0.
+- The functionality of CEDAR and its templates are replaced by the MomCare app and FHIR profiles.
+
+![Application components of data respositories.](./images/data-repository-components.png){#fig-fair-components}
+
+![Target architecture of FHIR-based FAIR data points](./images/target-architecture.png){#fig-target-architecture}
+
+
+### Facades for enabling transistion
+
+It is, however, not always possible to reimplement existing healthcare systems (EHR, apps) to a FHIR-compliant backend. The FHIR facade model provides a way to transition towards FHIR: rather than creating a FHIR repository to house the required data, the facade model data is fed directly from other repositories and converted to FHIR resources on demand. There are two ways to build a FHIR facade (@fig-fhir-facades):
+
+- __storage-less facade__ translates FHIR REST calls to queries to the underlying database or services of the original system. The internal information model is mapped to FHIR - find what FHIR resources and attributes represent data structures in your system. Such a facade passes all the calls to the original database.
+- __facade with intermediate FHIR server__ uses a generic FHIR Server for storing data that is going to be served over API. The same mapping of the internal information model to FHIR is performed but then synchronized data in the FHIR database with the data in the FHIR server that does the rest of the work.
+
+![Two ways for implementing a FHIR facade. Taken from @healthsamurai2019facade.](./images/fhir-facades.png){#fig-fhir-facades}
+
+
+## Components
+
+![Components of the DataCare demonstrator](images/components.png){#fig-components}
+
+
+
+
+
+
+

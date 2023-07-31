@@ -1,0 +1,20 @@
+---
+title: Offline capabale webapp
+---
+
+## Why do we need this
+
+## Describe solution
+
+## Describe implementation
+
+- Healthcare workers have access to Android tablets
+- Internet access is intermittent at point of care. Assume that healthcare worker has access to internet when she/he takes tablet home
+- Presenting results from data analytics needs to have solution for synchronization/offline usage
+- We have chosen for a combination of svelte + duckdb for building such offline capable Android apps. Details are explained in Appendix A.
+- This impacts the following elements in the reference architecture
+  - Data visualization and user interaciton
+  - Development, Engineering and DevOps: capability to deploy Svelte apps on and hosted app platform
+  - Standards: compatibility with D3.js ecosystem for building interactive data visualizations. Vega-lite is standard is used in this component, and is also available in the workbench
+
+
