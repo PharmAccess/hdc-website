@@ -46,7 +46,7 @@ By adopting FAIR and FHIR, DataCare aims to take a plausible road towards an eco
 
 ### Design principles
 
-As explained above, the long term goal of DataCare is to create an ecosystem where health data can be re-used as a common good. Essentially, the DataCare project aims to demonstrate that it is possible to effectively create a decentralised data sharing infrastructure in LMICs with existing technologies, such that health data can be re-used for the common good. As illustrated in @fig-rationale, DataCare aims to improve the infrastructure layer to facilitate the use of health data in the other layers.
+As explained above, the long term goal of DataCare is to create an ecosystem where health data can be reused as a common good. Essentially, the DataCare project aims to demonstrate that it is possible to effectively create a decentralised data sharing infrastructure in LMICs with existing technologies, such that health data can be reused for the common good. As illustrated in @fig-rationale, DataCare aims to improve the infrastructure layer to facilitate the use of health data in the other layers.
 
 ![Rationale for DataCare project](./images/rationale.png){#fig-rationale}
 
