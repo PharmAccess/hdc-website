@@ -240,6 +240,7 @@ Still not all DHIS2 topics have been (correctly) implemented in the reports:
 * **delivery and anc report referral related topics:** Now all referral patients are used for calculations, where previously only 'mother' type patients were evaluated. This information is not mapped to fhir, are non-mother patients filtered out? 
 
 Besides the specific DHIS2 topics there are also a few other todo's:
+
 * **Evaluation:** There are big differences with the previous DHIS2 reports that were based on COT data directly. Some differences were intended, some are not yet explained. This should be further investigated.
 * **Procedure mapping:** The ICD10 codes are used to map the DHIS2 topics to the conditions, but for the procedures the SNOMED codes are not used yet. This is because we could not find SNOMED codes for all procedures, and for some of the procedures, we were uncertain whether the SNOMED codes were correct. Therefore, still the list of SNOMED codes should be checked and filled. When this list of SNOMED codes is completed, the mapping should be based on the SNOMED codes (currently its matched on the text).
 
