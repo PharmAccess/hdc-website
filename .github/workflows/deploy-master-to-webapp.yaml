@@ -64,9 +64,8 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: site_deployment
-      - name: list files
-        run: ls -R
-#        run: zip -r intranet.zip intranet
+      - name: zip intranet folder
+        run: zip -r intranet.zip site_deployment
 #      - name: Create a GitHub release
 #        uses: ncipollo/release-action@v1
 #        with:
