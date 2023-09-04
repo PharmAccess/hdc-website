@@ -27,7 +27,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
             name: site_deployment
-            path: public
+            path: ${{ env.OUTPUT_LOCATION }}
 
   deploy:
     runs-on: ubuntu-latest
