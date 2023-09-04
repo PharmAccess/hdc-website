@@ -4,7 +4,7 @@ on: [push]
 
 env:
   APP_LOCATION: "/" # location of your client code
-  OUTPUT_LOCATION: "public/" # location of client code build output
+  OUTPUT_LOCATION: "public" # location of client code build output
 
 permissions:
   issues: write
