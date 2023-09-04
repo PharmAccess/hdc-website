@@ -1,4 +1,4 @@
-name: Deploy Quarto to azure webapp(production)
+name: Deploy Quarto to azure webapp
 
 on: [push]
 
@@ -66,4 +66,4 @@ jobs:
           tag: ${{ steps.tag_version.outputs.new_tag }}
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
-#          artefacts: site_deployment
+          artefacts: site_deployment
