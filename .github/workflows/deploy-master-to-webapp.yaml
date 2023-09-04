@@ -60,16 +60,10 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v3
+      - name: Create a GitHub release
+        uses: ncipollo/release-action@v1
         with:
-          name: site_deployment
-      - name: zip intranet folder
-        run: zip -r intranet.zip site_deployment
-#      - name: Create a GitHub release
-#        uses: ncipollo/release-action@v1
-#        with:
-#          tag: ${{ steps.tag_version.outputs.new_tag }}
-#          name: Release ${{ steps.tag_version.outputs.new_tag }}
-#          body: ${{ steps.tag_version.outputs.changelog }}
-#          artefacts: intranet.zip
+          tag: ${{ steps.tag_version.outputs.new_tag }}
+          name: Release ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ steps.tag_version.outputs.changelog }}
+          artefacts: site_deployment
