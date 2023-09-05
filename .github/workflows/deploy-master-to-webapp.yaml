@@ -22,12 +22,16 @@ jobs:
           # To install LaTeX to build PDF book
           tinytex: true     
       - name: Build the whitepaper
-        run: quarto render      
+        run: quarto render
+      - name: zip the intranet folder
+        run: zip -r intranet.zip intranet
       - name: Upload public directory for deploy job
         uses: actions/upload-artifact@v3
         with:
             name: site_deployment
-            path: ${{ env.OUTPUT_LOCATION }}
+            path: |
+              ${{ env.OUTPUT_LOCATION }}
+              intranet.zip
             if-no-files-found: error
 
   deploy:
@@ -39,6 +43,8 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: site_deployment
+      - name: Display structure of downloaded files
+        run: ls -R
       - name: Run Azure static webapp deploy action using azure token
         uses: Azure/static-web-apps-deploy@1a947af9992250f3bc2e68ad0754c0b0c11566c9
         with:
@@ -60,6 +66,8 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Display structure of downloaded files
+        run: ls -R
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
         with:
