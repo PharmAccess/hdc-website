@@ -1,6 +1,9 @@
 name: Deploy Quarto to azure webapp
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 env:
   APP_LOCATION: "/intranet" # location of your client code
@@ -43,8 +46,6 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: site_deployment
-      - name: Display structure of downloaded files
-        run: ls -R
       - name: Run Azure static webapp deploy action using azure token
         uses: Azure/static-web-apps-deploy@1a947af9992250f3bc2e68ad0754c0b0c11566c9
         with:
@@ -70,8 +71,6 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Display structure of downloaded files
-        run: ls -R
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
         with:
