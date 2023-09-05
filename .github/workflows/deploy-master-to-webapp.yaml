@@ -29,7 +29,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
             name: site_deployment
-            path: ${{ env.OUTPUT_LOCATION }}
+            path: |
+              ${{ env.OUTPUT_LOCATION }}
+              intranet.zip
             if-no-files-found: error
 
   deploy:
