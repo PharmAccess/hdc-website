@@ -3,7 +3,7 @@ name: Deploy Quarto to azure webapp
 on: [push]
 
 env:
-  APP_LOCATION: "./intranet" # location of your client code
+  APP_LOCATION: "/intranet" # location of your client code
   OUTPUT_LOCATION: "intranet" # location of client code build output
 
 permissions:
@@ -59,6 +59,10 @@ jobs:
     steps:
       - name: Checkout current branch
         uses: actions/checkout@v3
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: site_deployment
       - name: Bump version and push tag
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.1
@@ -72,4 +76,4 @@ jobs:
           tag: ${{ steps.tag_version.outputs.new_tag }}
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
-          artifacts: site_deployment
+          artifacts: intranet.zip
