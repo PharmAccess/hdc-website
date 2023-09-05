@@ -3,7 +3,7 @@ name: Deploy Quarto to azure webapp
 on: [push]
 
 env:
-  APP_LOCATION: "/" # location of your client code
+  APP_LOCATION: "./intranet" # location of your client code
   OUTPUT_LOCATION: "intranet" # location of client code build output
 
 permissions:
