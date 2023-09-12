@@ -39,6 +39,9 @@ The use of the same standardized tables as base reports, should allow the creati
 
 (Insert figures CP data structure overlay)
 
+##Patient Timeline Table
+The patient timeline is created by joining the FHIR resources for patient, encounter, claim, procedure and condition. 
+
 ##One-to-one mapping
 Source table: *beneficiary* mapped to *patient*
 | Variable | FHIR resource | 
@@ -80,10 +83,53 @@ Source table: *items*
 | ITEM_CODE | claim_status |
 | item_group | item_group | 
 
-## Filtering and more complex transformation
+## Filtering patients
 
+The patients included in the tables should only included mothers enrolled in the MomCare program. This means filtering the CarePay billing data based on; 
 
+gender --> only females
+age --> exclude children
+program_id --> include only specific numbers
+>> !! Where do we want to add the program_id as a resource? 
 
-Source table: 
+##Timing in the journey 
+Dates need to be converted to date format. 
 
+*Enrolment*
+The moment of enrolment (*enrolment_date*) is defined as the moment when the patient has both an approved claim status and a registered visit to a health provider. 
+
+*Age at enrolment* 
+Age of enrolment is determined by calculating the difference between the *enrolment_date* and *birth_date*. 
+Age groups are defined as the above age of enrolment being: 
+    Between 10-14; *age_group_10_14*, 
+    Between 15-19; *age_group_15_19*,
+    Between 20-24; *age_group_20_24*,
+    Between 25-29; *age_group_25_29*,
+    Between 30-34; *age_group_30_34*,
+    35 or older; *age_group_35_plus*
+
+*Gestation week* 
+The gestation week is calculated as the difference in weeks between the *expected_delivery_date* and the *procedure_date* 
+>> !! We should distinguish between the gestation week linked to the encounter (as described above) and the gestation week linked to the patient (this is the timing of where they are in the journey, so instead of *procedure_date* using the current date). 
+
+*Delivery*
+The delivery date is defined as the moment when a visit that has been categorized as a 'delivery' *visit_type* has taken place. 
+
+## Visit types
+Visits are defined by the type of items billed during that encounter. The type of item is derived from the *item_group*. 
+ANC visit when an item in the 'anc visit' or 'ultrasound' *item_group* is billed. 
+PNC visit when an item in the 'pnc visit' *item_group* is billed. 
+
+A delivery visit is defined as either
+* The encounter when an item related to a delivery *item_group* is billed, including the following item groups:
+    Delivery / Normal delivery / Single spontaneous delivery / Caesarean delivery / Cesarean delivery / Perineal laceration during delivery / Other assisted single delivery/ normal delivery - uncomplicated / Delivery complicated by fetal stress / Other complicated delivery / Multiple delivery / Single delivery by forceps and vacuum extractor / Delivery complicated by umbilical cord complications / Complications of anaesthesia during delivery / Outcome of delivery, unspecified
+* The encounter when a diagnosis related to a delivery was given, including the following conditions:
+    All O80 ICD10 codes, meaning conditions starting with O8.
+
+## Medication and DiagnosticReport measures
+>> Possibly include the transformation of items based on CP codes to those FHIR resources
+    Where: 
+    DO - medication > Medication
+    PO - procedure > Procedure
+    LO - lab > DiagnosticReport? 
 
