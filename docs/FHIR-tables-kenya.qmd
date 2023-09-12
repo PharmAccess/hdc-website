@@ -37,9 +37,53 @@ The use of the same standardized tables as base reports, should allow the creati
 
 #Transformation of source data to FHIR tables
 
+(Insert figures CP data structure overlay)
+
+##One-to-one mapping
+Source table: *beneficiary* mapped to *patient*
+| Variable | FHIR resource | 
+|ID|patient_id|
+| GENDER| gender |
+| DATE_OF_BIRTH | birth_date|
+| EXPECTED_DELIVERY_DATE | expected_delivery_date |
+
+Source table: *treatments* mapped to *encounter* 
+| Variable | FHIR resource | 
+|ID|encounter_id|
+|BENEFICIARY_REF_ID| patient_id |
+|PROVIDER_REF_ID| visit_provider_id|
+|DATE_TREATMENT | procedure_datetime |
+
+Source table: *claims* mapped to *claim*
+| Variable | FHIR resource | 
+| ID | claim_id |
+| TREATMENT_ID | encounter_id |
+| CREATED_DATE | created|
+| MODIFIED_DATE | modified |
+| STATUS | claim_status | 
+
+Source table: *treatment_diagnosis* mapped to *condition*
+| Variable | FHIR resource | 
+| TREATMENT_ID | encounter_id |
+| ICD10_CODE | icd10_diagnosis_code |
+| DIAGNOSIS_DESCRIPTION | diagnosis_description |
+
+##Merging with item group label
+An additional label 'item group' was added based on the item_code variable. This label was developed in the CareAnalytics data model, and was added here to facilitate the transformation of items to FHIR resources such as medication, procedures and other services.  
+
+Source table: *items*
+| Variable | FHIR resource | 
+| INVOICE_ID | item_invoice_id |
+| CLAIM_ID | item_claim_id |
+| QUANTITY | quantity|
+| ITEM_NAME | modified |
+| ITEM_CODE | claim_status |
+| item_group | item_group | 
+
+## Filtering and more complex transformation
 
 
 
-
+Source table: 
 
 
