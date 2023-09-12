@@ -1,0 +1,45 @@
+# FHIR tables Kenya
+As shown in the demonstrators outlining the FHIR adaptor for MomCare Tanzania and FHIR-based reporting, standardized tables based upon FHIR resources provide a strong fundament for futher analysis. These demonstrators also indicate that the largest challenge for the transformation of source data to FHIR Resources is the structure of the source data; especially when it lacks unique identifiers. The data structure of the source data in the MomCare Kenya setting is quite different from the MomCare Tanzania setting. Whereas in Tanzania the full data model is managed by PharmAccess, the Kenyan data models mainly derive their data from CarePay (an external partner that provides the mobile healthcare billing services). 
+
+The currently used tech stack that transforms the CarePay source data for analysis purposes is called CareAnalytics. Over time, many changes to the models within CareAnalytics have been made, but very few of them are clearly documented. This makes it complex to derive how tables are created (what source data are they based on? What transformations have happened? What models have been used for these transformations).
+
+Therefore, we decided to experiment with the conversion of the source data to standardized FHIR tables without going through the process of creating nested FHIR resources. Hypothetically, this should allow the functionalities of the other demonstrators to be used while bypassing the complexities of the CareAnalytics tech stack. 
+
+## Source data
+We decided to try to use data as close to the source as possible. This was on two main reasons: 
+* CarePay is in the process of adapting their data models. There is no point to building a transformation upon a changing base layer. However, the final data models are not yet close to being finished, and we would like to use the demonstrators in the short-term. 
+* The use of source data allows this demonstrator to be applied to other projects where no (or a limited) tech stack is currently used.
+* It allows us to have full control of the transparency in documentation; an essential aspect for this projects reusability and interoperability. 
+
+With source data, we refer to the (daily) data dumps provided by CarePay as duckdb files. These files were converted to .parquet files, and can be accessed under the data > bronze folders in the Jupyter Notebooks on the Analytics Workbench.
+
+#Analytics Workbench
+The Analytics Workbench is an open access platform where data can be accessed, managed, and transformed. 
+
+##Standardized tables
+The tables used are the same as in the Tanzanian demonstrator, a *patient_timeline* and *patient_information* table. (insert link to https://health-data-commons.pharmaccess.org/docs/reporting.html#patient-timeline-table)
+
+The *patient_timeline* table consists of all procedures and diagnosis that a patient is subjected to over time. It is created based on the following fhir resources:  
+
+* patient 
+* procedure
+* condition
+* encounter
+* observation
+* organization
+
+The *patient_information* table contains basic information specific to the patient. For further analysis those two tables are often combined into one *patient_timline_combined* table. 
+
+The use of the same standardized tables as base reports, should allow the creation of the reports of interests using no to very little adaptation of the code. Reports that have previously been created include:
+
+* **DHIS2 reports** provide insight in how many mothers visit a clinic, what conditions occur amongst mothers that visit that clinic, and what procedures mothers obtain in a clinic.
+* **Value point reports** provide the value points (described in the *value points* section) obtained by clinics by threathing their patients.
+
+#Transformation of source data to FHIR tables
+
+
+
+
+
+
+
