@@ -47,6 +47,7 @@ The patient timeline is created by joining the FHIR resources for patient, encou
 
 ### One-to-one mapping
 Source table: **beneficiary** mapped to **patient**
+
 | Variable | FHIR resource | 
 |---|---:|
 | ID | patient_id|
@@ -55,6 +56,7 @@ Source table: **beneficiary** mapped to **patient**
 | EXPECTED_DELIVERY_DATE | expected_delivery_date |
 
 Source table: **treatments** mapped to **encounter** 
+
 | Variable | FHIR resource | 
 |---|---:|
 |ID|encounter_id|
@@ -63,6 +65,7 @@ Source table: **treatments** mapped to **encounter**
 |DATE_TREATMENT | procedure_datetime |
 
 Source table: **claims** mapped to **claim**
+
 | Variable | FHIR resource | 
 |---|---:|
 | ID | claim_id |
@@ -72,6 +75,7 @@ Source table: **claims** mapped to **claim**
 | STATUS | claim_status | 
 
 Source table: **treatment_diagnosis** mapped to **condition**
+
 | Variable | FHIR resource | 
 |---|---:|
 | TREATMENT_ID | encounter_id |
@@ -85,6 +89,7 @@ The patients included in the tables should only included mothers enrolled in the
 gender --> only females
 age --> exclude children
 program_id --> include only specific numbers
+
 >> !! Where do we want to add the program_id as a resource? 
 
 ## Derived (Level: High Certainty) 
@@ -92,6 +97,7 @@ program_id --> include only specific numbers
 An additional label 'item group' was added based on the **item_code** variable. This label was developed in the CareAnalytics data model, and was added here to facilitate the transformation of items to FHIR resources such as medication, procedures and other services.  
 
 Source table: **items**
+
 | Variable | FHIR resource | 
 |---|---:|
 | INVOICE_ID | item_invoice_id |
@@ -106,6 +112,7 @@ Dates need to be converted to date format.
 
 *Enrolment* 
 The moment of enrolment (**enrolment_date**) is defined as the moment when the patient has both an approved claim status and a registered visit to a health provider. 
+
 >> Derived? Stage 2? More business rules than FHIR logic
 
 *Age at enrolment* 
@@ -120,6 +127,7 @@ Age groups are defined as the above age of enrolment being:
 
 *Gestation week* 
 The gestation week is calculated as the difference in weeks between the **expected_delivery_date** and the **procedure_date** 
+
 >> !! We should distinguish between the gestation week linked to the encounter (as described above) and the gestation week linked to the patient (this is the timing of where they are in the journey, so instead of *procedure_date* using the current date). 
 
 *Delivery*
@@ -131,6 +139,7 @@ ANC visit when an item in the 'anc visit' or 'ultrasound' **item_group** is bill
 PNC visit when an item in the 'pnc visit' **item_group** is billed. 
 
 A delivery visit is defined as either
+
 * The encounter when an item related to a delivery **item_group** is billed, including the following item groups:
     Delivery / Normal delivery / Single spontaneous delivery / Caesarean delivery / Cesarean delivery / Perineal laceration during delivery / Other assisted single delivery/ normal delivery - uncomplicated / Delivery complicated by fetal stress / Other complicated delivery / Multiple delivery / Single delivery by forceps and vacuum extractor / Delivery complicated by umbilical cord complications / Complications of anaesthesia during delivery / Outcome of delivery, unspecified
 * The encounter when a diagnosis related to a delivery was given, including the following conditions:
