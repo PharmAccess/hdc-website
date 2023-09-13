@@ -32,6 +32,7 @@ book:
         - docs/valuepoints.qmd
         - docs/offline-webapp.qmd
         - docs/workbench.qmd 
+        - docs/FHIR-tables-kenya.qmd
     - docs/bibliography.qmd
   sidebar:
     logo: "logo-pharmaccess.png"

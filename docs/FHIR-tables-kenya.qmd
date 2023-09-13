@@ -1,0 +1,153 @@
+# FHIR tables Kenya
+As shown in the demonstrators outlining the FHIR adaptor for MomCare Tanzania and FHIR-based reporting, standardized tables based upon FHIR resources provide a strong fundament for futher analysis. These demonstrators also indicate that the largest challenge for the transformation of source data to FHIR Resources is the structure of the source data; especially when it lacks unique identifiers. The data structure of the source data in the MomCare Kenya setting is quite different from the MomCare Tanzania setting. Whereas in Tanzania the full data model is managed by PharmAccess, the Kenyan data models mainly derive their data from CarePay (an external partner that provides the mobile healthcare billing services). 
+
+The currently used tech stack that transforms the CarePay source data for analysis purposes is called CareAnalytics. Over time, many changes to the models within CareAnalytics have been made, but very few of them are clearly documented. This makes it complex to derive how tables are created (what source data are they based on? What transformations have happened? What models have been used for these transformations).
+
+Therefore, we decided to experiment with the conversion of the source data to standardized FHIR tables without going through the process of creating nested FHIR resources. Hypothetically, this should allow the functionalities of the other demonstrators to be used while bypassing the complexities of the CareAnalytics tech stack. 
+
+## Source data
+We decided to try to use data as close to the source as possible. This was on two main reasons: 
+* CarePay is in the process of adapting their data models. There is no point to building a transformation upon a changing base layer. However, the final data models are not yet close to being finished, and we would like to use the demonstrators in the short-term. 
+* The use of source data allows this demonstrator to be applied to other projects where no (or a limited) tech stack is currently used.
+* It allows us to have full control of the transparency in documentation; an essential aspect for this projects reusability and interoperability. 
+
+With source data, we refer to the (daily) data dumps provided by CarePay as duckdb files. These files were converted to .parquet files, and can be accessed under the data > bronze folders in the Jupyter Notebooks on the Analytics Workbench.
+
+## Analytics Workbench
+The Analytics Workbench is an open access platform where data can be accessed, managed, and transformed. 
+
+## Standardized tables
+The tables used are the same as in the Tanzanian demonstrator, a *patient_timeline* and *patient_information* table. (insert link to https://health-data-commons.pharmaccess.org/docs/reporting.html#patient-timeline-table)
+
+The *patient_timeline* table consists of all procedures and diagnosis that a patient is subjected to over time. It is created based on the following fhir resources:  
+
+* patient 
+* procedure
+* condition
+* encounter
+* observation
+* organization
+
+The **patient_information** table contains basic information specific to the patient. For further analysis those two tables are often combined into one **patient_timline_combined** table. 
+
+The use of the same standardized tables as base reports, should allow the creation of the reports of interests using no to very little adaptation of the code. Reports that have previously been created include:
+
+* **DHIS2 reports** provide insight in how many mothers visit a clinic, what conditions occur amongst mothers that visit that clinic, and what procedures mothers obtain in a clinic.
+* **Value point reports** provide the value points (described in the *value points* section) obtained by clinics by threathing their patients.
+
+## Transformation of source data to FHIR tables
+
+>> (Insert figures CP data structure overlay)
+
+>> Stated vs Derived ? (TO DO) 
+
+## Stated
+### Patient Timeline Table
+The patient timeline is created by joining the FHIR resources for patient, encounter, claim, procedure and condition. 
+
+### One-to-one mapping
+Source table: **beneficiary** mapped to **patient**
+
+| Variable | FHIR resource | 
+|---|---:|
+| ID | patient_id|
+| GENDER| gender |
+| DATE_OF_BIRTH | birth_date|
+| EXPECTED_DELIVERY_DATE | expected_delivery_date |
+
+Source table: **treatments** mapped to **encounter** 
+
+| Variable | FHIR resource | 
+|---|---:|
+|ID|encounter_id|
+|BENEFICIARY_REF_ID| patient_id |
+|PROVIDER_REF_ID| visit_provider_id|
+|DATE_TREATMENT | procedure_datetime |
+
+Source table: **claims** mapped to **claim**
+
+| Variable | FHIR resource | 
+|---|---:|
+| ID | claim_id |
+| TREATMENT_ID | encounter_id |
+| CREATED_DATE | created|
+| MODIFIED_DATE | modified |
+| STATUS | claim_status | 
+
+Source table: **treatment_diagnosis** mapped to **condition**
+
+| Variable | FHIR resource | 
+|---|---:|
+| TREATMENT_ID | encounter_id |
+| ICD10_CODE | icd10_diagnosis_code |
+| DIAGNOSIS_DESCRIPTION | diagnosis_description |
+
+## Filtering patients
+
+The patients included in the tables should only included mothers enrolled in the MomCare program. This means filtering the CarePay billing data based on; 
+
+gender --> only females
+age --> exclude children
+program_id --> include only specific numbers
+
+>> !! Where do we want to add the program_id as a resource? 
+
+## Derived (Level: High Certainty) 
+### Merging with item group label
+An additional label 'item group' was added based on the **item_code** variable. This label was developed in the CareAnalytics data model, and was added here to facilitate the transformation of items to FHIR resources such as medication, procedures and other services.  
+
+Source table: **items**
+
+| Variable | FHIR resource | 
+|---|---:|
+| INVOICE_ID | item_invoice_id |
+| CLAIM_ID | item_claim_id |
+| QUANTITY | quantity|
+| ITEM_NAME | modified |
+| ITEM_CODE | claim_status |
+| item_group | item_group | 
+
+## Timing in the journey 
+Dates need to be converted to date format. 
+
+*Enrolment* 
+The moment of enrolment (**enrolment_date**) is defined as the moment when the patient has both an approved claim status and a registered visit to a health provider. 
+
+>> Derived? Stage 2? More business rules than FHIR logic
+
+*Age at enrolment* 
+Age of enrolment is determined by calculating the difference between the **enrolment_date** and **birth_date**. 
+Age groups are defined as the above age of enrolment being: 
+    Between 10-14; *age_group_10_14*, 
+    Between 15-19; *age_group_15_19*,
+    Between 20-24; *age_group_20_24*,
+    Between 25-29; *age_group_25_29*,
+    Between 30-34; *age_group_30_34*,
+    35 or older; *age_group_35_plus*
+
+*Gestation week* 
+The gestation week is calculated as the difference in weeks between the **expected_delivery_date** and the **procedure_date** 
+
+>> !! We should distinguish between the gestation week linked to the encounter (as described above) and the gestation week linked to the patient (this is the timing of where they are in the journey, so instead of *procedure_date* using the current date). 
+
+*Delivery*
+The delivery date is defined as the moment when a visit that has been categorized as a 'delivery' **encounter_type** has taken place. 
+
+## Encounter types
+Encounter types are defined by the type of items billed during that encounter. The type of item is derived from the **item_group**. 
+ANC visit when an item in the 'anc visit' or 'ultrasound' **item_group** is billed. 
+PNC visit when an item in the 'pnc visit' **item_group** is billed. 
+
+A delivery visit is defined as either
+
+* The encounter when an item related to a delivery **item_group** is billed, including the following item groups:
+    Delivery / Normal delivery / Single spontaneous delivery / Caesarean delivery / Cesarean delivery / Perineal laceration during delivery / Other assisted single delivery/ normal delivery - uncomplicated / Delivery complicated by fetal stress / Other complicated delivery / Multiple delivery / Single delivery by forceps and vacuum extractor / Delivery complicated by umbilical cord complications / Complications of anaesthesia during delivery / Outcome of delivery, unspecified
+* The encounter when a diagnosis related to a delivery was given, including the following conditions:
+    All O80 ICD10 codes, meaning conditions starting with O8.
+
+## Procedure types
+>> Possibly include the transformation of items based on CP codes to those FHIR resources
+    Where: 
+    DO - medication > Medication
+    PO - procedure > Procedure
+    LO - lab > DiagnosticReport? 
