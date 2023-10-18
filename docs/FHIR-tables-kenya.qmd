@@ -45,42 +45,80 @@ The use of the same standardized tables as base reports, should allow the creati
 ### Patient Timeline Table
 The patient timeline is created by joining the FHIR resources for patient, encounter, claim, procedure and condition. 
 
-### One-to-one mapping
-Source table: **beneficiary** mapped to **patient**
+### Carepay to FHIR mapping
+**TODO:** Explanation IPS
+We used the International Patient Summary (IPS) FHIR profile to map the carepay data to FHIR. The current structure of our fhir resources is visualized below.
 
-| Variable | FHIR resource | 
-|---|---:|
-| ID | patient_id|
-| GENDER| gender |
-| DATE_OF_BIRTH | birth_date|
-| EXPECTED_DELIVERY_DATE | expected_delivery_date |
+![Kenya data in Fhir IPS structure](images/kenya_data_mapping.png)
 
-Source table: **treatments** mapped to **encounter** 
+**patient**
 
-| Variable | FHIR resource | 
-|---|---:|
-|ID|encounter_id|
-|BENEFICIARY_REF_ID| patient_id |
-|PROVIDER_REF_ID| visit_provider_id|
-|DATE_TREATMENT | procedure_datetime |
+| FHIR resource element | CarePay Table | Carepay field | notes |
+|---|---|---|---:|
+| ID | beneficiary | identifier| one to one mapping |
+| GENDER| beneficiary | gender | one to one mapping |
+| DATE_OF_BIRTH | beneficiary | birthDate| one to one mapping | 
 
-Source table: **claims** mapped to **claim**
+**observation**
 
-| Variable | FHIR resource | 
-|---|---:|
-| ID | claim_id |
-| TREATMENT_ID | encounter_id |
-| CREATED_DATE | created|
-| MODIFIED_DATE | modified |
-| STATUS | claim_status | 
+| FHIR resource element | CarePay Table | Carepay field | notes |
+|---|---|---|---:|
+| subject_reference | beneficiary | ID| converted to uri | 
+| effectiveDateTimeDataAbsentReason_coding_system | na | na | hand filled | 
+| effectiveDateTimeDataAbsentReason_coding_code |  na | na | hand filled |
+| effectiveDateTimeDataAbsentReason_coding_display | na | na | hand filled | 
+| code_coding_code | na | na| hand filled | 
+| code_coding_system | na | na| hand filled | 
+| code_coding_display | na | na| hand filled | 
+| ValueDateTime | beneficiary | EXPECTED_DELIVERY_DATE| one to one mapping| 
 
-Source table: **treatment_diagnosis** mapped to **condition**
+The dataAbsentReason is the reason that the element does not contain an effectiveDateTime. The reason in this case is that the information is not available in carepay. 
 
-| Variable | FHIR resource | 
-|---|---:|
-| TREATMENT_ID | encounter_id |
-| ICD10_CODE | icd10_diagnosis_code |
-| DIAGNOSIS_DESCRIPTION | diagnosis_description |
+The code for the observation will be manually set for an EDD event.
+
+**condition**
+
+| FHIR resource element | CarePay Table | Carepay field | notes |
+|---|---|---:|
+| clinicalStatus_coding_code | ? | ? | ? |
+| clinicalStatus_coding_system | ? | ? | ? |
+| clinicalStatus_coding_version | ? | ? | ? |
+| code_coding_display | treatment_diagnosis | DIAGNOSIS_DESCRIPTION | one to one mapping | 
+| code_coding_code | treatment_diagnosis | ICD10_CODE | one to one mapping |
+| code_coding_system | na | na| hand filled (IDC10)|
+| subjectReference | beneficiary | ID | converted to uri | 
+| onsetDateTime | treatments | DATE_TREATMENT | one to one mapping | 
+
+The subjectReference has can be obtained from the beneficiary table, which can be coupled to the treatment_diagnosis table via the treatment_table.
+
+**procedure**
+
+| FHIR resource element | CarePay Table | Carepay field | notes |
+|---|---|---:|
+| status | items | ITEM_STATUS | the statuses are currently not fhir standard | 
+| code_coding_display | items | ITEM_NAME | one to one mapping | 
+| code_coding_code | items | ITEM_CODE | one to one mapping |
+| code_coding_system | na | na| hand filled (currently carepary code system) |
+| subject_reference | beneficiary | ID | na |
+| performedDateTime | treatments | DATE_TREATMENT | na |
+| performer_actor_reference | treatments | PROVIDER_REF_ID | uri based on this column | 
+| performer_actor_display | providers | ID | na | 
+| performer_actor_type | na | na | hand filled | 
+| category_coding_code | na | na | derived from items > ITEM_GROUP and treatment_diagnosis ICD10_CODE|
+| category_coding_display | na | na | own mapping to SNOMED Codes |
+| category_coding_system | na | na | hand filled (SNOMED) | 
+
+**questionnaireResponse**
+
+| FHIR resource element | CarePay Table | Carepay field | notes |
+|---|---|---|---:|
+| questionnaire | survey | SURVEY_ID | uri based on SURVEY_ID | 
+| status | survey | ? | ? | 
+| authored | survey | TRANSACTION_DATE | one to one mapping |
+| source_reference | survey | na| hand filled (currently carepary code system) |
+| item_linkId | survey | ID | na |
+| item_answer_valueString | survey | ANSWER | na |
+
 
 ## Filtering patients
 
