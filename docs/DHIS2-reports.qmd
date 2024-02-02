@@ -1,10 +1,10 @@
 # DHIS2
-DHIS2 is a tool used for collection, validation and presentation of patient-based statistical data. 
-To use this tool we need tables in a standardized format that can be used by DHIS2. From now on we call those table DHIS2 reports. In addition, governments use the DHIS2 reports to obtain insights the performance of different clinics. For MomCare three DHIS2 reports are of interest:
+DHIS2 is a tool used for collection, validation, and presentation of patient-based statistical data. 
+To use this tool, we need tables in a standardized format that can be used by DHIS2. From now on we call those tables DHIS2 reports. In addition, governments use the DHIS2 reports to obtain insights in the performance of different clinics. For MomCare three DHIS2 reports are of interest:
 
 * Antenatal Care (ANC) Report, containing all statistics about care for pregnant women before delivery of their child.
-* Delivery Report, containing statistsics about the care during the delivery
-* Postpartum Care (PNC) Report, containing statistics about the care of the mother after delivery of her child.
+* Delivery Report, containing statistsics about the care and health of the mother during the delivery, and informartion about the child
+* Postpartum Care (PNC) Report, containing statistics about the care of the mother after delivery of her child. This report usually also contains statistics about he child. However, this information was not available and for that reason the PNC report created is not complete.
 
 The DHIS2 reports are of the following format:
 
@@ -15,37 +15,45 @@ The DHIS2 reports are of the following format:
 Where the description shows the DHIS2 topic, and for each clinic and each age group the occurence in that year and month is counted.
 
 ## DHIS2 reporter 
-To create the DHIS2 reports based on the fhir data and standardized tables created by the Baser Reporter we developed the DHIS2Reporter Class.  
+All code to create the DHIS2 reports can be found the [Datacare-fhir-data-insights-cot repository](https://github.com/PharmAccess/datacare-fhir-data-insights-cot).
+The COT data was first converted into standardized FHIR resources. The Fhir resources were then processed into standardized tables such as a patienttimeline, which lists all procedures and diagnosis that the mother received over time. The conversion of Fhir data in the standardized reports occurs with the base reporter module as described in the standardized reporting section. Based on these standardized reports, the DHIS2 reporter module is used to create the DHIS2 reports.
 
 All Fhir resources required for the DHIS2 reports are: 
 
-* patient
-* condition
-* procedure
-* encounter
-* observation
-* organization
-* serviceRequest
-* questionnaireResponse
+* patient, providing information about the age of the mother
+* condition, providing information about all diagnosis the mother received
+* procedure, providing information about all procedures the mother received, and information about the time of each procedure
+* encounter, providing information about the type of visit (ANC, delivery, or PNC)
+* observation, providing information about the expected delivery date
+* organization, providing information about the clinics that the mother visisted
+* serviceRequest, providing information that indicates whether the mother was referred and for what reason
+* questionnaireResponse, providing all questionnaire responses of the mother
 
 In @fig-DHIS2-reporting-schema the flow to create a DHIS2 report has been visualized. 
 
 ![DHIS2 reporting flow and required input, dashed blocks: optional actions, orange: 'raw' fhir data, yellow: external data, blue: intermediate data, green: processed data](./images/reporting%20schema%20dhis2.png){#fig-DHIS2-reporting-schema}
 
-The DHIS2 reporter has functions to create the DHIS2 report for each report separately (ANC, Delivery, PNC)
+After runnning the base reporter module †o create the base tables, the DHIS2 reporter module is used to create the ANC, delivery, and PNC DHIS2 report. Within the DHIS2 reporter the following actions take place: 
 
-Before running the DHIS2 reporter, first the baseReporter should be used to created the base tables.  
-
-Thereafter the following actions occur in the DHIS2 reporter:
-
-* mapping tables are created based on several mapping files for the DHIS2 reports. These files make it easy to map rows in the *questionnaire_response* and *patient_timeline* tables to topics in the DHIS2 reports. This section is dashed because it is not required to recreate the mapping tables every time. However, when running the dhis2reporter for the first time and when the mapping is updated, the mapping tables should be recreated.
-* The patient_timeline table is enriched with extra information that is of importance to create DHIS2 reports.
-* Then, the DHIS2 topics are coupled to the patient timeline and questionnaire response data using the mapping tables, and separate functions for more unique topics.
-* Finally, the DHIS2 report is created based on the coupled patient_timeline and questionnaire data.
+* **Creation of mapping tables:** A mapping between DHIS2 topic and the corresponding condition/procedure or other characteristic in the data was created in the form of CSV files.  These files make it easy to map rows in the *questionnaire_response* and *patient_timeline* tables to topics in the DHIS2 reports. These CSV files are converted to SQL tables to use in the DHIS2 reporter. This section is dashed, because it is only required one time to load the mapping tables in the database. However, when the mapping files would be updated, this section should be ran again.
+* **Enrichment of the patient timeline:** The patient_timeline table is enriched with extra information that is of importance to create DHIS2 reports.
+* **Coupling DHIS2 topics:** The DHIS2 topics are coupled to the patient timeline and questionnaire response data using the mapping tables. In addition for mor and separate functions for more unique topics.
+* **Creation DHIS2 reports:** The DHIS2 report is created based on the coupled patient_timeline and questionnaire data.
 
 ### DHIS2 topics
 
 For each topic in the DHIS2 reports a calculation or filtering of the patients to which the condition applies is required. In this section, we describe for each topic how it was obtained from the data.
+
+The serial number and the description refer to the topics in the DHIS2 reports. The code is the code given to a procedure or condition, the system is the code system, in this case SNOMED for procedures and ICD10 for conditions, origin refers to the fhir resource where the information can be found, the original description the description given in the COT system, and the extra filter contains exta information of importance for calcultion of the topic.
+
+For questionnaire responses this includes the answer to the question. for many topics the VISIT TYPE (ANC, PNC or delivery) is of importance, therefore the VISIT_TYPE is often used as an extra filter. This information comes from the ENCOUNTER_RESOURCE. Besides this, for procedures and conditions, we have added calculated fields:
+
+* VISIT_TYPE_NO: the number of visit for a specific visit type (anc, pnc delivery)
+* VISIT_NO: the number of visit (each visit counts)
+* HIV_TEST: counts if it is the first second, third or xxxth HIV test
+* gestation_week: contains the week of gestation for a patient at the time of the visit.
+* age: age of the mother at enrollment. Note that, for example, when a mothers birthday is on the 22nd of August, we consider the age of the mother on the 21 of August still as 21.
+* MALARIA_TREATMENT: the number of malaria treatment 
 
 **ANC reports**
 
@@ -117,15 +125,6 @@ For each topic in the DHIS2 reports a calculation or filtering of the patients t
 |11           |Pregnant Women referred to CTC                                                             | na | na | serviceRequest | na | total nr of patients in referral table where reason is HIV |
 
 
-The info under extra filter mentions topic specific filter information. For questionnaire responses this includes the answer to the question. for many topics the VISIT TYPE (ANC, PNC or delivery) is of importance, therefore the VISIT_TYPE is often used as an extra filter. This information comes from the ENCOUNTER_RESOURCE. Besides this, for procedures and conditions, we have added calculated fields:
-
-* VISIT_TYPE_NO: the number of visit for a specific visit type (anc, pnc delivery)
-* VISIT_NO: the number of visit (each visit counts)
-* HIV_TEST: counts if it is the first second, third or xxxth HIV test
-* gestation_week: contains the week of gestation for a patient at the time of the visit.
-* age: age of the patient at enrollment 
-* MALARIA_TREATMENT: the number of malaria treatment 
-
 **delivery topics**
 
 | serial_number | description                                                      | code | system | origin | originial_description | extra filter |
@@ -134,7 +133,7 @@ The info under extra filter mentions topic specific filter information. For ques
 | 2a            | Mothers delivered at the facility                                |11466000|SNOMED|procedure|Cesarean Section|VISIT_TYPE = delivery|
 | 2a            | Mothers delivered at the facility                                |177184002|SNOMED|procedure|%Delivery%|VISIT_TYPE = delivery|
 | 2a            | Mothers delivered at the facility                                |237311001|SNOMED|procedure|Breech delivery|VISIT_TYPE = delivery|
-| 2b            | Deliveries/Birth before arrival at the facility (BBA)            |na|na|QuestionnaireResponse|%where was the baby born%|anser like %other%|
+| 2b            | Deliveries/Birth before arrival at the facility (BBA)            |na|na|questionnaireResponse|%where was the baby born%|anser like %other%|
 | 2c            | Delivered by assistance of traditional birth attendants(TBA)     |na|na|questionnaireResponse|%was there a birth attendant present?%|answer=true|
 | 2d            | Delivered at home without assistance of TBA                      |na|na|questionnaireResponse|%was there a birth attendant present?%|answer=false|
 | 3a            | Delivered after 12 hours since onset of labour                   |O63|ICD10|condition|Long labour|VISIT_TYPE = delivery|
@@ -189,7 +188,6 @@ The info under extra filter mentions topic specific filter information. For ques
 | 15e           | Client received POP                                              |255664004|SNOMED|procedure|pop|na|
 | 16a           | New baby born died                                               |P96.8|ICD10|condition|Neonatal death|na|
 
-Again the info under extra filter can be the answer to a question or the VISIT_TYPE as explained for the ANC topics. For delivery report no calculated fiels were required.
 
 **pnc**
 
@@ -226,77 +224,26 @@ Again the info under extra filter can be the answer to a question or the VISIT_T
 ## Updating DHIS2 Topics
 It is possible that the method to calculate certain DHIS2 topics must be updated. To do so there are multiple options:
 
-* Alter or add to the mapping tables that are used to map the patient_timeline information. The mapping tables can be found under *data/external*. When creating a mapping table with a new name, this must be updated in the configuration of the DHIS2 reporter, which can be found under *src/data/config.py*.
-* Alter or add to the mapping tables that are used to map the questionnaire_response information. The mapping tables can be found under *data/external*. When creating a mapping table with a new name, this must be updated in the configuration of the DHIS2 reporter, which can be found under *src/data/config.py*.
-* add to the mapping queries. If it is only one topic it can be more convenient to add an extra piece in the mapping query for that topic. It is a bit of seeking for a balance to apply filtering via a mapping table (when the same columns are filtered for multiple topics) or to add a separate piece of code to the mapping query (when filtering only applies to that specific topic). For each report there is a separate mapping one can add to *add_anc_mapping*, *add_delivery_mapping*, *add_pnc_mapping*. These queries can be found under *scr/data/SQL_queries*.
+* **Patient timeline mapping:** Alter or add to the mapping tables that are used to map the patient_timeline information. The mapping tables are stored in the master data folder on azure. When creating a mapping table with a new name, this must be updated in the configuration of the DHIS2 reporter, which can be found under *src/data/DHIS2/config.py*.
+* **Questionnaire mapping:**Alter or add to the mapping tables that are used to map the questionnaire_response information. These mapping tables can be found under in the master data folder on Azure as well. When creating a mapping table with a new name, this must be updated in the configuration of the DHIS2 reporter, which can be found under *src/data/DHIS2/config.py*.
+* **Separate calulcations:** If it is only one topic that must be updated, it can be more convenient to add to the mapping queries for the DHIS2 reports. For each report there is a separate mapping one can add to: *add_anc_mapping*, *add_delivery_mapping*, and *add_pnc_mapping*. These queries can be found under *scr/data/DHIS2/SQL_queries*. 
 
 ## DHIS2 TODO
-Still not all DHIS2 topics have been implemented in the reports:
+Still not all DHIS2 topics have been (correctly) implemented in the reports:
 
-* Twin related topics in delivery report: There are topics about twins that were not available in the current reports yet, but calculations are available in Andreas' mapping code, that have yet to be converted in the DHIS2 reporter class
-* anc report topic: Pregnant women tested for HIV with spouse/partner. Currently checked if visit_type = ANC and if tested for HIV. but 'with spouse/parter' is unclear
-* anc report topic: Pregnant women testing Malaria using MRDT/BS. Now it is only checed if malaria rapid test, but this should also include visit items like MRDT. MRDT is not yet mapped to fhir, because type = null, and we only mapped where type is drug or test.
-* anc report topic: Pregnant Women counselled for family planning. this item is always classified as PNC, so either it does not occur in anc or something is missed.
-* delivery report topic: VACUUM (MV). mapping already prepared, but this visit item is not yet mapped to fhir, because type is equipment and not drug or test.
-* delivery report topic: Placenta removed manually. mapping already prepared, but item is not yet mapped to fhir. because type is null (not test or drug)
-* delivery and anc report referral related topics: Now all referral patients are used for calculations, where previously only 'mother' type patients were evaluated. This information is not mapped to fhir, are non-mother patients filtered out? 
-* Evaluation: There are big differences with the previous DHIS2 reports that were based on COT data directly. Some differences were intended, some are not yet explained. This should be further investigated.
+* **Twin related topics in delivery report**: There are topics about twins that were not available in the current reports yet, but calculations are available in previous mapping code, that have yet to be converted in the DHIS2 reporter class
+* **ANC report topic: Pregnant women tested for HIV with spouse/partner**. Currently it is checked if visit_type = ANC and if tested for HIV. but it is unknown if this is 'with spouse/parter'.
+* **ANC report topic: Pregnant women testing Malaria using MRDT/BS.** Now it is only checked if a malaria rapid test was performed, but this should also include procedures with subject MRDT. MRDT is not yet mapped to fhir, because type = null and we only mapped visit items where the type is drug or test.
+* **ANC report topic: Pregnant Women counselled for family planning.** This item is always classified as PNC, so either it does not occur in ANC or information is missed.
+* **Delivery report topic: VACUUM (MV).** The mapping for this topic is already implemented, but this visit item is not yet mapped to fhir, because type is equipment, and not drug or test.
+* **delivery report topic: Placenta removed manually.** The mapping for this topic is already prepared, but item is not yet mapped to fhir. because its type is null (not test or drug)
+* **delivery and anc report referral related topics:** Now all referral patients are used for calculations, where previously only 'mother' type patients were evaluated. This information is not mapped to fhir, are non-mother patients filtered out? 
+
+Besides the specific DHIS2 topics there are also a few other todo's:
+
+* **Evaluation:** There are big differences with the previous DHIS2 reports that were based on COT data directly. Some differences were intended, some are not yet explained. This should be further investigated.
+* **Procedure mapping:** The ICD10 codes are used to map the DHIS2 topics to the conditions, but for the procedures the SNOMED codes are not used yet. This is because we could not find SNOMED codes for all procedures, and for some of the procedures, we were uncertain whether the SNOMED codes were correct. Therefore, still the list of SNOMED codes should be checked and filled. When this list of SNOMED codes is completed, the mapping should be based on the SNOMED codes (currently its matched on the text).
 
 ## USING DHIS2reporter
-**TODO:** Update steps below based on updated code for the Reporter!
-Assuming one works with the cookie cutter template the DHIS2 reporter can be used as follows:
-
-1. run jupyter notebook (make jupyter)
-2. create a new jupyter notebook
-3. make sure the nescessary libraries are loaded in jupyter: 
-```python
-#standard data wrangling libraries
-import pandas as pd
-import numpy as np
-
-# to get linking to paths correct: when working from the notebooks folder, you only have to navigate one path up ('../'), but from another folder (maybe one inside the notebooks folder) you might need to navigate more paths up.
-#TODO: currently one has to manually redirect to the main (work folder). Later this should be more user friendly. 
-import sys
-sys.path.append('../')
-
-# duckdb
-#TODO: we now created a duckdb class, which is not really nescessary, but it makes the linking to the duckdb file a bit easier.
-import duckdb
-from src.data.duck_db_class import DUCKDB
-
-#DHIS2 reports
-from src.data.DHIS2_reporting import DHIS2_reports
-```
-4. connect to duckdb (currently with separate duckdb class but can also be done without!)
-```python
-db = DUCKDB('momCareDBv0.8.0','../work')
-connection = db.connect()
-```
-5. initialize reporter with the connection and location of the main folder
-```python
-reporter = DHIS2_reports(connection,'../work')
-```
-6. prepare mapping tables. In this step the mapping tables are created (overwritten). This step is not nescessary if the mapping tables are already up to date.
-```python
-reporter.prepare_mapping_tables()
-```
-7. clear intermediate tables, to create the DHIS2 reports we need soe intermediat tables like the patient_timeline and questionnaire_responses, old tables should for now be removed.
-```python
-reporter.clear_intermediate_tables()
-```
-8. create the intermediate table questionnaire_response and patient_timeline.
-```python
-reporter.create_questionnaire_table()
-reporter.prepare_patient_timeline()
-```
-9. create the DHIS2 report, depending on the desired report run:
-```python
-df = reporter.create_anc_report()
-df = reporter.create_delivery_report()
-df = reporter.create_pnc_report()
-```
-10. the result will be outputted in a dataframe as well as stored in duckdb in the table processed.DHIS2_anc_report / processed.DHIS2_delivery_report / processed.DHIS2_pnc_report
-
-
-
-
+**TODO:** Implement example notebooks on analytics workbench!
+Example notebooks, showing how to run the Baser reporter and the DHIS2 reporter are available in the analytics workbench. These reporters can be run to manually create the standardized base reports or DHIS2 reports. In addition, one can also directly load the base reports (patient_timeline, questionnaire_responses) or DHIS2 reports, and directly start analyzing them.
