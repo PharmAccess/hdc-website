@@ -28,3 +28,4 @@ This repository contains the source code for the Health Data Commons (KDC) demon
 ![](github-dev-commit.png)
 
 - Open a pull request, so that others can review and approve your changes.
+- once pull request is approved and merged, the changes will be visible on the website.
