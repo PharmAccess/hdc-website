@@ -1,6 +1,9 @@
 name: Deploy Quarto to azure webapp
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 env:
   APP_LOCATION: "/intranet" # location of your client code
