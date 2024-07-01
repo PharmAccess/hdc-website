@@ -67,7 +67,8 @@ format:
       - top=30mm
       - left=20mm
       - heightrounded
-    fontfamily: libertinus
+    # 20240701 getting error 'font not found' all of the sudden
+    # fontfamily: libertinus
     colorlinks: true
     linkcolor: teal
     filecolor: teal
