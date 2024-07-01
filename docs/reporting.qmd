@@ -21,18 +21,18 @@ The *patient_timeline* is of the following format:
 
 | patient_id | encounter_id | visit_provider_id | visit_provider_name | procedure_time | code | system | type | description_name | visitType | visit_type_code | visit_no | visit_type_no | gestation_week |
 |---|---|---|---|---|---|---|---|---:| ---:|---|---|---|---|
-| 6c2c-3576 | 34 | 52 | Dawar Dispensary | 2022-10-10 | O98.7 | ICD10 | condition | HIV in pregnancy | Antenatal care | 424525001 | 2 | 2 | 20 |
-| 6c2c-3576| 34 | 52 | Dawar Dispensary | 2022-10-10 | NaN | snomed | procedure | HIV test | Antenatal care | 424525001 | 1 | 1 | 18 |
-| 6c2c-3576| 123 | 2 | Ngarenairobi RC Health centre | 2022-11-18 | Z34 | ICD10 | condition | HIV test | Postpartum care | 424525001 | 10 | 1 | 44 |
-| 6c2c-3576 | 123 | 2 | Ngarenairobi RC Health centre | 2022-11-18 | NaN | snomed | procedure | Malaria Rapid Test | Antenatal care | 133906008 | 3 | 3 | 30 |
-|6c2c-3576 | 123 | 2 | Ngarenairobi RC Health centre | 2022-11-18 | NaN | snomed | procedure | Blood pressure | Antenatal care | 424525001 | 1 | 1 | 8 |
+|12345678 | 34 | 52 | Dawar Dispensary | 2022-10-10 | O98.7 | ICD10 | condition | HIV in pregnancy | Antenatal care | 424525001 | 2 | 2 | 20 |
+|12345678 | 34 | 52 | Dawar Dispensary | 2022-10-10 | NaN | snomed | procedure | HIV test | Antenatal care | 424525001 | 1 | 1 | 18 |
+|12345678 | 123 | 2 | Ngarenairobi RC Health centre | 2022-11-18 | Z34 | ICD10 | condition | HIV test | Postpartum care | 424525001 | 10 | 1 | 44 |
+|12345678 | 123 | 2 | Ngarenairobi RC Health centre | 2022-11-18 | NaN | snomed | procedure | Malaria Rapid Test | Antenatal care | 133906008 | 3 | 3 | 30 |
+|12345678 | 123 | 2 | Ngarenairobi RC Health centre | 2022-11-18 | NaN | snomed | procedure | Blood pressure | Antenatal care | 424525001 | 1 | 1 | 8 |
 
 next to the patient_timeline also some basic information about the patient is of importance, for this reason the *patient_information* table is created: 
 
 | patient_id | birthDate | enrollment_date | age_at_enrolment | age_group | delivery_date | expected_delivery_date |
 |---|---|---|---|---|---|---|
-| 0242ac120002 | 2002-12-10 | 2023-04-22 | 20 | AGE_GROUP_20_24 | NaT |2023-09-06 |
-| 4b9e0e3b2-9ced | 1990-09-10 | 2020-04-01 | 29 | AGE_GROUP_25_29 | 2020-10-01 |2020-10-08 |
+| abc123def456 | 2002-12-10 | 2023-04-22 | 20 | AGE_GROUP_20_24 | NaT |2023-09-06 |
+| 987654321 | 1990-09-10 | 2020-04-01 | 29 | AGE_GROUP_25_29 | 2020-10-01 |2020-10-08 |
 
 For further analysis those two tables are often combined into one *patient_timline_combined* table
 
@@ -42,10 +42,10 @@ Besides the patient's yourney the patient is also requested to answer different 
 
 | patientId | ClinicName | date | survey_id | question_id |question | answer | ... | 
 |---|---|---|---|---|---|---|---:|
-| 6c2c-3576 | Tumaini Hospital | 2021-10-07 | 1 | 44 |Do you have a previous C-Section scar?	 | false | ... |
-| 6c2c-3576 | Tumaini Hospital | 2021-10-07 | 1 | 42 | Is this your first child? | true | ... |
-| 6c2c-3576 | Tumaini Hospital | 2021-10-07 | 2 | 36| At what age did you have your first child?	 | <20 | ... |
-| 6c2c-3576 | Tumaini Hospital | 2021-10-07 | 2 | 35 | How many times have you been pregnant before? | 0 | ... |
+|12345678 | Tumaini Hospital | 2021-10-07 | 1 | 44 |Do you have a previous C-Section scar?	 | false | ... |
+|12345678 | Tumaini Hospital | 2021-10-07 | 1 | 42 | Is this your first child? | true | ... |
+|12345678 | Tumaini Hospital | 2021-10-07 | 2 | 36| At what age did you have your first child?	 | <20 | ... |
+|12345678 | Tumaini Hospital | 2021-10-07 | 2 | 35 | How many times have you been pregnant before? | 0 | ... |
 
 
 ## Usage Base Reporter
