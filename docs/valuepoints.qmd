@@ -1,14 +1,20 @@
 # Value Points
 ## Introduction
-A clinic can earn value points by performing different clinical actions part of the 
+In 2023, PharmAccess introduced ValuePoints (VPs) in Hanang province, a rural district with low digitalization rates, to visualize completeness of maternal care delivery and incentivize value. Integrated into the local digital ecosystem, VPs provide real-time insights at the patient journey level, enabling providers to deliver higher value, patient-centric care. 
 
 ## ValuePoint criteria
 
-### Obtained Value Points
+### Service Indicators
 
-There are six topics for which a mother can earn value points  
+Value Points are assigned to key service indicators across the pregnancy journey. 
 
-**ANC profile**: To collect mothers who had an ANC profile, we check for visits that include the following procedures 
+These indicators include: 
+
+**Early ANC**: An antenatal care (ANC) visit registered within the first 12 weeks of pregnancy (ANC < 12 weeks)
+
+**ANC profile**: Full antenatal care profile administered. 
+
+To count the mothers who had a full ANC profile, we check for visits that include the following procedures: 
 
 * vdrl  
 * hemoglobin  
@@ -17,19 +23,20 @@ There are six topics for which a mother can earn value points
 * blood pressure  
 * urine test 
 
-In addition, the ANC profile should also take place during the first visit. 
+In addition, the ANC profile should take place during the first visit. 
 
-**Early ANC**: We check for ANC visits within the first 12 weeks of pregnancy 
+**Ultrasound before end of second trimester**: We check for visits with an ultrasound procedure that occurred within the first 24 weeks of pregnancy. (Ultrasound < 24 weeks) 
 
-**Ultrasound before end of second trimester**: We check for visits with an ultrasound procedure that occurred within the first 24 weeks of pregnancy. 
+**4+ ANCs**: Four or more registered antenatal care visits. 
+Clinics receive 0.5 points per visit for the first 4 visits. For further ANC visits no more points are received. 
 
-**4ANC**: we check which mothers have at least 4 ANC visits. Clinics receive 0.5 points per visit for the first 4 visits. For further ANC visits no more points are received. 
+**Facility Based Delivery**: We filter mothers that have had a delivery visit at the facilities. 
 
-**Facility Based Delivery**: we filter mothers that have had a delivery visit. 
+**2PNC**: Two or more registed postnatal care (PNC) visits. 
+Clinics receive 0.5 points per visit for the first 2 visits. For further PNC visits no more points can be obtained. 
 
-**2PNC**: we check which mothers have 2 PNC visits. Clinics receive 0.5 points per visit for the first 2 visits. For further PNC visits no more points can be obtained. 
-
-There is a limited time in which the different value points can be obtained. The cut-off date and the total  number of value points that can be obtained for each topic are displayed in the graph below. The week of pregnancy for a mother is calculated based on her Expected Delivery Date (EDD).  
+### Obtained Points
+There is a limited time in which the different value points can be obtained. The cut-off date and the total  number of value points that can be obtained for each topic are displayed in the graph below. The week of pregnancy (gestational age) for a mother is calculated based on her Expected Delivery Date (EDD).  
 
 |Criterium | Points | Cut-off-date|
 |---|---|---|
@@ -40,14 +47,7 @@ There is a limited time in which the different value points can be obtained. The
 |Facility Based Delivery|4|42 weeks|
 |2PNCs|1|44 weeks|
 
-The date assigned to an obtained value point is the date that a procedure was performed. 
-
-**TODO**
-2PNC should be checked if the PNC visits occured in first twee weeks after delivery (if delivered at facility) or if not delivered at facility if PNC visit is within 4 weeks of EDD. Currently just taken one cutof date.. 
-
-**Note on difference in pregnancy weeks in speaking and coding terms**
-When stating week 12 as cut-off date, it is meant to be up to and including the 12th week of pregnancy, while In code this will be anything below 12: 
-To clarify:  a mother is pregnant for 86 days: 86/7 = 12.2 weeks. We would say the mother is in her 13th week of pregnancy, and thus the mother has passed this cut-off date. In code, we check whether the week is <=12 which is false and thus we the cut-off date was passed. 
+The date assigned to an obtained ValuePoint is the date that a procedure was performed. 
 
 ### Missed Value Points
 If a mother does not obtain a value point before the cut-off date, we consider this value point as missed. Missed value points are coupled to a missed date. The missed date is calculated based on the EDD and the cut-off weeks. 
@@ -59,7 +59,7 @@ Attainable points are only calculated for the current date and defined for any t
 
 Attainable points are only given to the clinic where the mother had her first visit. 
 
-## Shared Value POints
+### Shared Value POints
 As mentioned above a mother can visit different clinics. For this reason, the concept of shared value points was introduced.  
 Value points can be shared for: 
 
@@ -91,8 +91,7 @@ The mothers are divided in the different trimesters as follows:
 |third | week 27 | week 42 or date of delivery |
 |past EDD | week 42 or date of delivery | week 46 |
 
-
-## Value Points Reporter
+### Value Points Reporter
 Like the DHIS2 reporter the value points reporter uses the base tables created by the base reporter (see @fig-ValuePoints-reporter) 
 
 ![Value Points reporting flow and required input, blue: intermediate data, green: processed data](./images/value_points_reporter.png){#fig-ValuePoints-reporter}
@@ -106,6 +105,16 @@ All the tables that are used in the value points dashboard are then created base
 Finally, The results are saved in a separate DuckDB file and uploaded to Azure storage bucket.
 
 **NOTE** we agreed to only show data in the valuepoints dashboard that were created from 01-03-2023 onwards.
+
+
+### IN PROGRESS
+
+**TODO**
+2PNC should be checked if the PNC visits occured in first twee weeks after delivery (if delivered at facility) or if not delivered at facility if PNC visit is within 4 weeks of EDD. Currently just taken one cutof date.. 
+
+**Note on difference in pregnancy weeks in speaking and coding terms**
+When stating week 12 as cut-off date, it is meant to be up to and including the 12th week of pregnancy, while In code this will be anything below 12: 
+To clarify:  a mother is pregnant for 86 days: 86/7 = 12.2 weeks. We would say the mother is in her 13th week of pregnancy, and thus the mother has passed this cut-off date. In code, we check whether the week is <=12 which is false and thus we the cut-off date was passed. 
 
 **TODO**
 
