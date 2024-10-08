@@ -33,6 +33,7 @@ book:
         - docs/offline-webapp.qmd
         - docs/workbench.qmd 
         - docs/FHIR-tables-kenya.qmd
+        - docs/momcare_fair.qmd
     - docs/bibliography.qmd
   sidebar:
     logo: "logo-pharmaccess.png"
